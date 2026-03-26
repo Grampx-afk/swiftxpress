@@ -404,7 +404,8 @@ tr:hover td{background:rgba(255,255,255,.025)}
             <h4>Business Info</h4>
             <div>
               <label style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:4px">WhatsApp Number</label>
-              <input class="sfield" id="s-wa" type="text" placeholder="e.g. 2348012345678"/>
+              <input class="sfield" id="s-wa" type="text" placeholder="e.g. 2348012345678" oninput="previewWA(this.value)"/>
+              <div style="margin-top:6px;font-size:11px;color:var(--gray);font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:.5px" id="wa-preview"></div>
             </div>
             <div style="margin-top:14px">
               <label style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:4px">Account Name</label>
@@ -794,14 +795,38 @@ function saveOrders() {
 }
 
 // ── SETTINGS ──
+function previewWA(val) {
+  const clean = val.replace(/\D/g, '');
+  const el = document.getElementById('wa-preview');
+  if (!val) { el.textContent = ''; return; }
+  if (clean.length < 10) {
+    el.style.color = '#ff6b6b';
+    el.textContent = '⚠ Include country code — e.g. 234 for Nigeria';
+  } else {
+    el.style.color = 'var(--green)';
+    el.textContent = '✓ wa.me/' + clean;
+  }
+}
+
 function saveSettings() {
+  const waRaw = document.getElementById('s-wa').value.trim();
+  const waClean = waRaw.replace(/\D/g, '');
+
+  // Validate WhatsApp number — must be at least 10 digits
+  if (waRaw && waClean.length < 10) {
+    showToast('WhatsApp number looks invalid — use country code e.g. 2348012345678', 'error');
+    return;
+  }
+
   ['s-wa','s-acctname','s-acctnum','s-fee'].forEach(id => {
-    settings[id] = document.getElementById(id).value;
+    settings[id] = document.getElementById(id).value.trim();
   });
   localStorage.setItem('sxSettings', JSON.stringify(settings));
-  // Update WA number live so buttons work immediately without reload
-  if (settings['s-wa']) window.WA_NUMBER = settings['s-wa'];
-  showToast('✓ Settings saved', 'success');
+
+  // Update live so WA buttons work immediately without reload
+  if (waClean) window.WA_NUMBER = waClean;
+
+  showToast('✓ Settings saved — WhatsApp number updated', 'success');
 }
 
 function changePassword() {
