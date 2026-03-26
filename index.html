@@ -307,6 +307,16 @@ tr:hover td{background:rgba(255,255,255,.02)}
   .prog-line{width:24px}
   .filter-row{flex-wrap:wrap}
 }
+/* ── FLOATING WHATSAPP ── */
+.wa-float{position:fixed;bottom:28px;right:28px;z-index:999;display:flex;flex-direction:row;align-items:center;gap:10px}
+.wa-float-btn{width:58px;height:58px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;box-shadow:0 4px 24px rgba(37,211,102,.5);transition:all .25s cubic-bezier(.34,1.56,.64,1);animation:waEntrance .6s cubic-bezier(.34,1.56,.64,1) 1.2s both;position:relative;flex-shrink:0}
+.wa-float-btn:hover{transform:scale(1.12);box-shadow:0 8px 32px rgba(37,211,102,.65)}
+.wa-float-btn svg{width:32px;height:32px;fill:#fff}
+.wa-float-tooltip{background:#111;border:1px solid #252525;color:#fff;font-family:'Rajdhani',sans-serif;font-weight:600;font-size:12px;letter-spacing:.5px;padding:8px 14px;border-radius:8px;white-space:nowrap;opacity:0;transform:translateX(8px);transition:all .2s ease;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.wa-float:hover .wa-float-tooltip{opacity:1;transform:translateX(0)}
+.wa-ping{position:absolute;top:1px;right:1px;width:13px;height:13px;background:#fff;border-radius:50%;border:2px solid #25D366;animation:waPing 2.2s ease-in-out infinite}
+@keyframes waEntrance{0%{opacity:0;transform:scale(0) rotate(-180deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes waPing{0%,100%{transform:scale(1);opacity:.9}60%{transform:scale(1.5);opacity:0}}
 </style>
 </head>
 <body>
@@ -670,14 +680,23 @@ tr:hover td{background:rgba(255,255,255,.02)}
 // ── SUPABASE ──
 const _supa = window.SUPABASE_URL && window.SUPABASE_URL !== '%%SUPABASE_URL%%';
 let supabase = null;
-if (_supa) {
-  const s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-  s.onload = () => {
-    supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-  };
-  document.head.appendChild(s);
-}
+let supabaseReady = false;
+
+const supabaseInit = new Promise(resolve => {
+  if (_supa) {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    s.onload = () => {
+      supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+      supabaseReady = true;
+      resolve();
+    };
+    s.onerror = () => resolve(); // fallback to localStorage on load failure
+    document.head.appendChild(s);
+  } else {
+    resolve(); // no supabase, use localStorage
+  }
+});
 
 // ── STATE ──
 let orders = [];
@@ -693,7 +712,11 @@ function showPage(id) {
 }
 function goHome() { showPage('home'); }
 function startOrder() { showPage('order'); }
-function openWA() { window.open('https://wa.me/2348000000000?text=Hi+SwiftXpress!+I+just+placed+an+order.','_blank'); }
+function openWA(msg) {
+  const num = (window.WA_NUMBER || '2348000000000').replace(/\D/g,'');
+  const text = encodeURIComponent(msg || 'Hi SwiftXpress! I just placed an order.');
+  window.open(`https://wa.me/${num}?text=${text}`, '_blank');
+}
 
 // ── DELIVERY TYPE ──
 function selectType(t) {
@@ -760,7 +783,10 @@ function submitOrder() {
 }
 
 // ── PAYMENT ──
-function goToPayment() {
+async function goToPayment() {
+  const btn = document.querySelector('#summary .btn-full');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
   document.getElementById('pay-id').textContent = currentOrder.id;
   if (deliveryType === 'inside') {
     document.getElementById('pay-amount').textContent = '₦700';
@@ -772,8 +798,12 @@ function goToPayment() {
     document.getElementById('pay-amount').textContent = 'TBD';
     n.querySelector('.pn-sub').textContent = 'Fee will be confirmed via WhatsApp';
   }
-  // Save order to Supabase (or localStorage fallback)
+
+  // Wait for supabase to be ready then save
+  await supabaseInit;
   await saveOrder(currentOrder);
+
+  if (btn) { btn.disabled = false; btn.textContent = 'PROCEED TO PAYMENT →'; }
   showPage('payment');
 }
 
@@ -784,8 +814,20 @@ function copyAcct(btn, text) {
   setTimeout(()=>{ btn.textContent='Copy'; btn.classList.remove('copied'); }, 2000);
 }
 
-function confirmPaid() {
-  // Update order status to pending (admin confirms manually)
+async function confirmPaid() {
+  const btn = document.querySelector('#payment .btn-green');
+  if (btn) { btn.disabled = true; btn.textContent = 'Confirming…'; }
+
+  // Update order status to paid
+  await updateOrderStatus(currentOrder.id, 'paid');
+  currentOrder.status = 'paid';
+
+  if (btn) { btn.disabled = false; btn.textContent = '✅ I HAVE PAID'; }
+
+  // Send WhatsApp message with order details
+  const msg = `Hi SwiftXpress! I just paid for Order #${currentOrder.id}.\n\nName: ${currentOrder.name}\nPhone: ${currentOrder.phone}\nOrder: ${currentOrder.item}\nPickup: ${currentOrder.pickup}\nDelivery: ${currentOrder.dropoff}\nFee: ${currentOrder.fee}`;
+  openWA(msg);
+
   showPage('confirm');
 }
 
@@ -935,5 +977,16 @@ function showPage(id) {
   setTimeout(initReveal, 50);
 }
 </script>
+<!-- FLOATING WHATSAPP BUTTON -->
+<div class="wa-float" onclick="openWA()">
+  <div class="wa-float-tooltip">Chat with us on WhatsApp</div>
+  <button class="wa-float-btn" aria-label="Chat on WhatsApp">
+    <span class="wa-ping"></span>
+    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 2C8.268 2 2 8.268 2 16c0 2.478.675 4.797 1.85 6.787L2 30l7.4-1.825A13.93 13.93 0 0016 30c7.732 0 14-6.268 14-14S23.732 2 16 2zm0 25.5a11.44 11.44 0 01-5.844-1.606l-.418-.25-4.393 1.082 1.107-4.277-.273-.44A11.44 11.44 0 014.5 16C4.5 9.649 9.649 4.5 16 4.5S27.5 9.649 27.5 16 22.351 27.5 16 27.5zm6.27-8.504c-.344-.172-2.036-1.005-2.352-1.12-.316-.114-.547-.172-.777.172-.23.344-.893 1.12-1.094 1.35-.2.23-.402.258-.746.086-.344-.172-1.452-.535-2.767-1.707-1.022-.912-1.713-2.038-1.913-2.382-.2-.344-.021-.53.15-.7.155-.154.344-.402.516-.603.172-.2.23-.344.344-.574.115-.23.058-.43-.029-.603-.086-.172-.777-1.873-1.065-2.563-.28-.673-.564-.582-.777-.593l-.661-.011c-.23 0-.603.086-.919.43-.316.344-1.208 1.18-1.208 2.878s1.237 3.338 1.409 3.568c.172.23 2.435 3.718 5.9 5.213.825.356 1.469.569 1.971.728.828.264 1.582.227 2.178.138.664-.1 2.036-.832 2.323-1.636.287-.804.287-1.493.2-1.636-.085-.143-.315-.23-.659-.402z"/>
+    </svg>
+  </button>
+</div>
+
 </body>
 </html>

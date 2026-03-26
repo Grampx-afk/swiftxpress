@@ -159,6 +159,8 @@ tr:hover td{background:rgba(255,255,255,.025)}
 .modal-actions select:focus{border-color:var(--red)}
 .modal-save{background:var(--red);color:#fff;border:none;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;padding:10px 22px;border-radius:7px;cursor:pointer;transition:all .2s cubic-bezier(.34,1.3,.64,1)}
 .modal-save:hover{background:var(--red-dark);transform:translateY(-1px);box-shadow:0 4px 14px rgba(227,30,36,.3)}
+.modal-wa{background:#1a2a1a;color:#4caf50;border:1px solid #2a3d2a;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;padding:10px 16px;border-radius:7px;cursor:pointer;transition:all .2s cubic-bezier(.34,1.3,.64,1)}
+.modal-wa:hover{background:#1e321e;transform:translateY(-1px)}
 
 /* ── ANALYTICS PANEL ── */
 .analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
@@ -277,6 +279,7 @@ tr:hover td{background:rgba(255,255,255,.025)}
         <div class="topbar-right">
           <span style="font-size:12px;color:var(--gray);font-family:'Rajdhani',sans-serif" id="topbar-date"></span>
           <button class="tb-btn" onclick="exportCSV()">⬇ Export</button>
+          <button class="tb-btn" style="color:#4caf50;border-color:#2a3d2a;background:#0d1a0d" onclick="openWA()">💬 WhatsApp</button>
           <button class="tb-btn tb-logout" onclick="doLogout()">Sign Out</button>
         </div>
       </header>
@@ -489,6 +492,7 @@ tr:hover td{background:rgba(255,255,255,.025)}
         <option value="assigned">Assigned</option>
         <option value="delivered">Delivered</option>
       </select>
+      <button class="modal-wa" onclick="whatsappOrder()">💬 WA</button>
       <button class="modal-save" onclick="saveModal()">SAVE</button>
     </div>
   </div>
@@ -504,13 +508,16 @@ let supabase = null;
 
 async function initSupabase() {
   if (_supa) {
-    await new Promise(resolve => {
+    await new Promise((resolve, reject) => {
       const s = document.createElement('script');
       s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-      s.onload = resolve;
+      s.onload = () => {
+        supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+        resolve();
+      };
+      s.onerror = resolve; // fallback gracefully
       document.head.appendChild(s);
     });
-    supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
   }
 }
 
@@ -729,6 +736,22 @@ function setFilter(f, btn) {
   renderTable();
 }
 
+// ── WHATSAPP ──
+function openWA(msg) {
+  const saved = JSON.parse(localStorage.getItem('sxSettings') || '{}');
+  const num = (saved['s-wa'] || window.WA_NUMBER || '').replace(/\D/g,'');
+  if (!num) { showToast('Set your WhatsApp number in Settings first', 'error'); return; }
+  const text = encodeURIComponent(msg || 'Hi SwiftXpress!');
+  window.open(`https://wa.me/${num}?text=${text}`, '_blank');
+}
+
+function whatsappOrder() {
+  const o = orders.find(x => x.id === modalOrderId);
+  if (!o) return;
+  const msg = `SwiftXpress Order #${o.id}\n\nCustomer: ${o.name}\nPhone: ${o.phone}\nOrder: ${o.item}\nPickup: ${o.pickup}\nDelivery: ${o.dropoff}\nType: ${o.type === 'inside' ? 'Inside Campus' : 'Outside Campus'}\nFee: ${o.fee}\nStatus: ${o.status}`;
+  openWA(msg);
+}
+
 // ── MODAL ──
 function openModal(id) {
   const o = orders.find(x=>x.id===id);
@@ -776,6 +799,8 @@ function saveSettings() {
     settings[id] = document.getElementById(id).value;
   });
   localStorage.setItem('sxSettings', JSON.stringify(settings));
+  // Update WA number live so buttons work immediately without reload
+  if (settings['s-wa']) window.WA_NUMBER = settings['s-wa'];
   showToast('✓ Settings saved', 'success');
 }
 
