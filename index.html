@@ -849,7 +849,7 @@ function goHome() { showPage('home'); }
 function startOrder() { showPage('order'); }
 function openWA(msg) {
   const saved = JSON.parse(localStorage.getItem('sxSettings') || '{}');
-  const num = (saved['s-wa'] || window.WA_NUMBER || '2348000000000').replace(/\D/g,'');
+  const num = (saved['s-wa'] || window.WA_NUMBER || '2349023413227').replace(/\D/g,'');
   const text = encodeURIComponent(msg || 'Hi SwiftXpress! I just placed an order.');
   window.open(`https://wa.me/${num}?text=${text}`, '_blank');
 }
