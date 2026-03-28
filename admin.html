@@ -5,13 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>SwiftXpress — Admin Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;600;700&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
-<script>
-// SwiftXpress Config — values injected by Vercel build.sh
-// Falls back safely to localStorage/defaults if not set
-window.SUPABASE_URL  = "%%SUPABASE_URL%%";
-window.SUPABASE_ANON_KEY = "%%SUPABASE_ANON_KEY%%";
-window.WA_NUMBER     = "%%WA_NUMBER%%";
-</script>
+<script src="config.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -293,7 +287,7 @@ tr:hover td{background:rgba(255,255,255,.025)}
 
 /* Mobile */
 @media(max-width:480px){
-  .topbar-right .tb-btn:not(.tb-logout){display:none}
+  .topbar-right .tb-btn:not(.tb-logout):not(:nth-child(2)){display:none} /* Shows 'New Order +' and 'Sign Out' on mobile */
   .topbar{height:50px}
   .topbar-title{font-size:16px}
 
@@ -391,6 +385,7 @@ tr:hover td{background:rgba(255,255,255,.025)}
         </div>
         <div class="topbar-right">
           <span style="font-size:12px;color:var(--gray);font-family:'Rajdhani',sans-serif" id="topbar-date"></span>
+          <button class="tb-btn" style="color:var(--green);border-color:var(--green-border);background:var(--green-dim)" onclick="openCreateModal()">New Order +</button>
           <button class="tb-btn" onclick="exportCSV()">Export CSV</button>
           <button class="tb-btn" style="color:#4caf50;border-color:#2a3d2a;background:#0d1a0d" onclick="openWA()">WhatsApp</button>
           <button class="tb-btn tb-logout" onclick="doLogout()">Sign Out</button>
@@ -560,7 +555,7 @@ tr:hover td{background:rgba(255,255,255,.025)}
             <h4>Danger Zone</h4>
             <div class="setting-row">
               <div><div class="setting-label" style="color:#ff6b6b">Clear All Orders</div><div class="setting-sub">Permanently delete all order data from storage</div></div>
-              <button onclick="clearAll()" style="background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:6px;cursor:pointer;text-transform:uppercase;transition:.15s" onmouseover="this.style.background='rgba(255,107,107,.2)'" onmouseout="this.style.background='rgba(255,107,107,.1)'">Clear Data</button>
+              <button id="clear-btn" type="button" onclick="handleClearAllData()" style="background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:6px;cursor:pointer;text-transform:uppercase;transition:.15s" onmouseover="this.style.background='rgba(255,107,107,.2)'" onmouseout="this.style.background='rgba(255,107,107,.1)'">Clear Data</button>
             </div>
           </div>
         </div>
@@ -592,7 +587,10 @@ tr:hover td{background:rgba(255,255,255,.025)}
       </div>
       <div class="modal-row">
         <div class="modal-field"><div class="mf-label">Delivery Type</div><div class="mf-val" id="m-type"></div></div>
-        <div class="modal-field"><div class="mf-label">Fee</div><div class="mf-val" id="m-fee" style="color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:20px"></div></div>
+        <div class="modal-field">
+          <div class="mf-label">Fee</div>
+          <input id="m-fee" type="text" class="sfield" style="margin-top:4px;color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:18px"/>
+        </div>
       </div>
       <div class="modal-row">
         <div class="modal-field"><div class="mf-label">Placed At</div><div class="mf-val" id="m-time" style="color:var(--gray)"></div></div>
@@ -607,6 +605,71 @@ tr:hover td{background:rgba(255,255,255,.025)}
       </select>
       <button class="modal-wa" onclick="whatsappOrder()">WhatsApp</button>
       <button class="modal-save" onclick="saveModal()">SAVE</button>
+      <button class="modal-delete" style="background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;padding:9px 15px;border-radius:6px;cursor:pointer;text-transform:uppercase;transition:.15s" onclick="deleteOrderNow()" onmouseover="this.style.background='rgba(255,107,107,.2)'" onmouseout="this.style.background='rgba(255,107,107,.1)'">Delete</button>
+    </div>
+  </div>
+</div>
+<!-- CREATE ORDER MODAL -->
+<div class="modal-overlay" id="modal-create-overlay" onclick="if(event.target===this)closeCreateModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>CREATE NEW ORDER</h3>
+      <button class="modal-close" onclick="closeCreateModal()"></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="mf-label">Customer Name</label>
+          <input id="c-name" type="text" class="sfield" placeholder="Full name" style="margin-top:6px"/>
+        </div>
+        <div class="modal-field">
+          <label class="mf-label">Phone</label>
+          <input id="c-phone" type="tel" class="sfield" placeholder="080 1234 5678" style="margin-top:6px"/>
+        </div>
+      </div>
+      <div class="modal-row" style="margin-top:14px">
+        <div class="modal-field">
+          <label class="mf-label">Order Description</label>
+          <textarea id="c-item" class="sfield" style="min-height:80px;margin-top:6px" placeholder="What they are ordering..."></textarea>
+        </div>
+      </div>
+      <div class="modal-row" style="margin-top:14px">
+        <div class="modal-field">
+          <label class="mf-label">Pickup</label>
+          <input id="c-pickup" type="text" class="sfield" placeholder="Pickup location" style="margin-top:6px"/>
+        </div>
+        <div class="modal-field">
+          <label class="mf-label">Delivery</label>
+          <input id="c-dropoff" type="text" class="sfield" placeholder="Delivery location" style="margin-top:6px"/>
+        </div>
+      </div>
+      <div class="modal-row" style="margin-top:14px">
+        <div class="modal-field">
+          <label class="mf-label">Delivery Type</label>
+          <select id="c-type" class="sfield" style="margin-top:6px" onchange="document.getElementById('c-fee').value=this.value==='inside'?'₦700':'TBD'">
+            <option value="inside">Inside Campus</option>
+            <option value="outside">Outside Campus</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="mf-label">Fee</label>
+          <input id="c-fee" type="text" class="sfield" value="₦700" style="margin-top:6px;color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:18px"/>
+        </div>
+      </div>
+      <div class="modal-row" style="margin-top:14px">
+        <div class="modal-field">
+          <label class="mf-label">Initial Status</label>
+          <select id="c-status" class="sfield" style="margin-top:6px">
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="assigned">Assigned</option>
+            <option value="delivered">Delivered</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-save" style="width:100%" onclick="saveNewOrder()">CREATE ORDER</button>
     </div>
   </div>
 </div>
@@ -614,9 +677,26 @@ tr:hover td{background:rgba(255,255,255,.025)}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- CONFIRMATION MODAL -->
+<div class="modal-overlay" id="modal-confirm-overlay" onclick="if(event.target===this)closeConfirmModal()">
+  <div class="modal" style="width:400px;text-align:center;padding:12px">
+    <div class="modal-body" style="padding:32px 24px">
+      <div style="width:54px;height:54px;background:var(--red-dim);border:1px solid var(--red-border);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+      </div>
+      <h3 style="font-size:24px;margin-bottom:12px">CLEAR ALL DATA?</h3>
+      <p style="font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:28px">This will permanently delete every order record from the database. This action is irreversible.</p>
+      <div style="display:flex;gap:10px">
+        <button class="tb-btn" style="flex:1;padding:12px" onclick="closeConfirmModal()">Cancel</button>
+        <button class="modal-save" style="flex:1;background:var(--red)" onclick="confirmBulkClear()">DELETE ALL</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 //  SUPABASE 
-const _supa = window.SUPABASE_URL && window.SUPABASE_URL !== '%%SUPABASE_URL%%';
+const _supa = true; // Always try Supabase since we have config.js
 let _supaClient = null;
 
 async function initSupabase() {
@@ -639,6 +719,86 @@ let orders = [];
 let activeFilter = 'all';
 let modalOrderId = null;
 let settings = JSON.parse(localStorage.getItem('sxSettings') || '{}');
+
+console.log('SwiftXpress Script Loading...');
+
+// ── DELETION LOGIC (Custom Premium Modal) ──
+function handleClearAllData() {
+  const btn = document.getElementById('clear-btn');
+  if (btn.disabled) return;
+  
+  console.log('handleClearAllData triggered');
+  document.getElementById('modal-confirm-overlay').classList.add('open');
+}
+
+function closeConfirmModal() {
+  document.getElementById('modal-confirm-overlay').classList.remove('open');
+}
+
+async function confirmBulkClear() {
+  closeConfirmModal();
+  const btn = document.getElementById('clear-btn');
+  btn.disabled = true;
+  btn.textContent = 'Clearing...';
+  btn.style.opacity = '0.5';
+  
+  try {
+    await executeBulkClear();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Clear Data';
+    btn.style.opacity = '1';
+  }
+}
+
+async function executeBulkClear() {
+  console.log('executeBulkClear started');
+  showToast('Cleaning database...', 'success');
+  
+  if (_supaClient) {
+    try {
+      // Deleting using gte('id', 0) to ensure we hit all numeric IDs
+      const { error } = await _supaClient.from('orders').delete().filter('id', 'gt', 0);
+      if (error) {
+        // Fallback for non-numeric or other cases
+        const { error: error2 } = await _supaClient.from('orders').delete().neq('name', '___NON_EXISTENT___');
+        if (error2) {
+          console.error('Clear failed:', error2);
+          showToast('Database Error: ' + error2.message, 'error');
+          return;
+        }
+      }
+    } catch (e) {
+      console.error('Clear exception:', e);
+      showToast('System error during clear', 'error');
+      return;
+    }
+  }
+  
+  orders = [];
+  renderAll();
+  showToast('DATABASE CLEARED', 'success');
+}
+
+async function deleteOrderNow() {
+  if (!modalOrderId) return;
+  if (!confirm('Permanently delete this order?')) return;
+  
+  if (_supaClient) {
+    const { error } = await _supaClient.from('orders').delete().eq('id', modalOrderId);
+    if (error) {
+      showToast('Delete failed', 'error');
+      return;
+    }
+  }
+  
+  orders = orders.filter(o => String(o.id) !== String(modalOrderId));
+  renderAll();
+  showToast('Order Deleted', 'success');
+  closeModal();
+}
+
+const fmtId = (id) => String(id).padStart(3, '0');
 
 //  AUTH 
 const ADMIN_USER = 'admin';
@@ -678,59 +838,68 @@ async function init() {
   if (settings['s-acctname']) document.getElementById('s-acctname').value = settings['s-acctname'];
   if (settings['s-acctnum']) document.getElementById('s-acctnum').value = settings['s-acctnum'];
   if (settings['s-fee']) document.getElementById('s-fee').value = settings['s-fee'];
+  
   await loadOrders();
+
+  // ── SUPABASE REALTIME (INSTANT UPDATES) ──
+  if (_supaClient) {
+    let debounceTimer;
+    _supaClient
+      .channel('orders-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+        console.log('Realtime update received:', payload);
+        
+        // Debounce to prevent flickering during bulk operations
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          loadOrders(); 
+        }, 500);
+        
+        // Optional: Play sound or show toast for new orders
+        if (payload.eventType === 'INSERT' && document.getElementById('t-alerts').classList.contains('on')) {
+          showToast(' New order received!', 'success');
+          if (document.getElementById('t-sound').classList.contains('on')) {
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
+            audio.play().catch(() => {});
+          }
+        }
+      })
+      .subscribe();
+  }
+
+  // Fallback Polling (Safety check every 30s)
+  setInterval(() => { if (!modalOrderId) loadOrders(); }, 30000);
 }
 
 //  SUPABASE CRUD 
 async function loadOrders() {
   if (_supaClient) {
     const { data, error } = await _supaClient.from('orders').select('*').order('created_at', { ascending: false });
-    if (!error && data) orders = data;
-  } else {
-    orders = JSON.parse(localStorage.getItem('sxOrders') || '[]');
-    // Seed demo data if empty (localStorage fallback only)
-    if (orders.length === 0) {
-      orders = [
-        {id:'9821',name:'Tunde Adeyemi',phone:'0801 234 5678',item:'2 plates jollof rice, 1 fried chicken from Mama Titi',pickup:'Main Canteen',dropoff:'Hostel B, Room 12',type:'inside',fee:'₦700',time:'10:32 AM · 12 Mar',status:'delivered'},
-        {id:'3347',name:'Amaka Obi',phone:'0812 345 6789',item:'Provisions — Milo, milk, indomie x5, sugar',pickup:'School Gate Market',dropoff:'Female Hostel 3, Room 4A',type:'inside',fee:'₦700',time:'1:15 PM · 12 Mar',status:'paid'},
-        {id:'5512',name:'Ibrahim Musa',phone:'0703 456 7890',item:'Printed assignment — 20 pages from Library',pickup:'Library Printing Shop',dropoff:'Faculty of Engineering, Block C',type:'inside',fee:'₦700',time:'3:48 PM · 12 Mar',status:'assigned'},
-        {id:'7764',name:'Chisom Eze',phone:'0905 567 8901',item:'Shawarma x2, Pepsi 1.5L from Chicken Republic Ogbomoso',pickup:'Chicken Republic, Ogbomoso',dropoff:'Hostel A, Room 7',type:'outside',fee:'Via WhatsApp',time:'9:05 AM · 13 Mar',status:'pending'},
-        {id:'1193',name:'Fatima Abdullahi',phone:'0816 678 9012',item:'Zobo drink x3 bottles, puff puff from Mama Ngozi',pickup:'Mama Ngozi Canteen',dropoff:'Mass Comm Dept, Lecturer Room',type:'inside',fee:'₦700',time:'11:22 AM · 13 Mar',status:'pending'},
-      ];
-      localStorage.setItem('sxOrders', JSON.stringify(orders));
+    if (!error && data) {
+      orders = data;
+    } else if (error) {
+      console.error('Supabase load error:', error);
+      showToast('Database error: ' + error.message, 'error');
     }
+  } else {
+    showToast('Database connection unavailable', 'error');
+    orders = [];
   }
   renderAll();
 }
 
-async function saveOrders() {
-  // Orders are saved individually on insert; this just re-renders
-  renderAll();
-}
 
-async function updateOrderStatusDB(id, status) {
+async function updateOrderDB(id, fields) {
   if (_supaClient) {
-    const { error } = await _supaClient.from('orders').update({ status }).eq('id', id);
+    const { error } = await _supaClient.from('orders').update(fields).eq('id', id);
     if (error) { showToast('Failed to update', 'error'); return false; }
   } else {
-    const local = JSON.parse(localStorage.getItem('sxOrders') || '[]');
-    const o = local.find(x => x.id === id);
-    if (o) { o.status = status; localStorage.setItem('sxOrders', JSON.stringify(local)); }
+    showToast('Database connection missing', 'error');
+    return false;
   }
   return true;
 }
 
-async function clearAllOrders() {
-  if (_supaClient) {
-    const { error } = await _supaClient.from('orders').delete().neq('id', '');
-    if (error) { showToast('Failed to clear', 'error'); return; }
-  } else {
-    localStorage.removeItem('sxOrders');
-  }
-  orders = [];
-  renderAll();
-  showToast(' All orders cleared', 'success');
-}
 
 //  RENDER 
 function renderAll() {
@@ -742,7 +911,7 @@ function renderAll() {
 function renderStats() {
   document.getElementById('stat-all').textContent = orders.length;
   document.getElementById('stat-pending').textContent = orders.filter(o=>o.status==='pending').length;
-  document.getElementById('stat-paid').textContent = orders.filter(o=>o.status==='paid').length;
+  document.getElementById('stat-paid').textContent = orders.filter(o=>o.status==='paid' || o.status==='delivered').length;
   document.getElementById('stat-delivered').textContent = orders.filter(o=>o.status==='delivered').length;
 }
 
@@ -756,7 +925,8 @@ function renderTable() {
       o.item.toLowerCase().includes(search) ||
       o.pickup.toLowerCase().includes(search) ||
       o.dropoff.toLowerCase().includes(search) ||
-      o.id.includes(search)
+      o.id.toString().includes(search) ||
+      (o.order_number && o.order_number.toString().includes(search))
     );
   }
   const tbody = document.getElementById('orders-tbody');
@@ -772,7 +942,7 @@ function renderTable() {
     table.style.display = '';
     tbody.innerHTML = filtered.slice().reverse().map(o => `
       <tr>
-        <td style="color:var(--gray);font-size:11px;font-family:'Rajdhani',sans-serif;font-weight:600">#${esc(o.id)}</td>
+        <td style="color:var(--gray);font-size:11px;font-family:'Rajdhani',sans-serif;font-weight:600">#${o.order_number || fmtId(o.id)}</td>
         <td>
           <div style="font-weight:500">${esc(o.name)}</div>
           <div style="font-size:11px;color:var(--gray);margin-top:2px">${esc(o.phone)}</div>
@@ -799,7 +969,14 @@ function renderAnalytics() {
   const paid = orders.filter(o=>o.status==='paid').length;
   const assigned = orders.filter(o=>o.status==='assigned').length;
   const pending = orders.filter(o=>o.status==='pending').length;
-  const revenue = orders.filter(o=>o.type==='inside'&&(o.status==='paid'||o.status==='delivered')).length * 700;
+  
+  // Calculate revenue by parsing fees (strip ₦, commas, and handle non-numeric)
+  const revenue = orders
+    .filter(o => o.status === 'paid' || o.status === 'delivered')
+    .reduce((sum, o) => {
+      const val = parseInt(String(o.fee || '0').replace(/[^\d]/g, '')) || 0;
+      return sum + val;
+    }, 0);
 
   document.getElementById('a-revenue').textContent = '₦' + revenue.toLocaleString();
   document.getElementById('a-rate').textContent = orders.length ? Math.round(del/orders.length*100)+'%' : '0%';
@@ -859,25 +1036,25 @@ function openWA(msg) {
 }
 
 function whatsappOrder() {
-  const o = orders.find(x => x.id === modalOrderId);
+  const o = orders.find(x => String(x.id) === String(modalOrderId));
   if (!o) return;
-  const msg = `SwiftXpress Order #${o.id}\n\nCustomer: ${o.name}\nPhone: ${o.phone}\nOrder: ${o.item}\nPickup: ${o.pickup}\nDelivery: ${o.dropoff}\nType: ${o.type === 'inside' ? 'Inside Campus' : 'Outside Campus'}\nFee: ${o.fee}\nStatus: ${o.status}`;
+  const msg = `SwiftXpress Order #${o.order_number || fmtId(o.id)}\n\nCustomer: ${o.name}\nPhone: ${o.phone}\nOrder: ${o.item}\nPickup: ${o.pickup}\nDelivery: ${o.dropoff}\nType: ${o.type === 'inside' ? 'Inside Campus' : 'Outside Campus'}\nFee: ${o.fee}\nStatus: ${o.status}`;
   openWA(msg);
 }
 
 //  MODAL 
 function openModal(id) {
-  const o = orders.find(x=>x.id===id);
+  const o = orders.find(x=>String(x.id)===String(id));
   if (!o) return;
   modalOrderId = id;
-  document.getElementById('m-id').textContent = o.id;
+  document.getElementById('m-id').textContent = o.order_number || fmtId(o.id);
   document.getElementById('m-name').textContent = o.name;
   document.getElementById('m-phone').textContent = o.phone;
   document.getElementById('m-item').textContent = o.item;
   document.getElementById('m-pickup').textContent = o.pickup;
   document.getElementById('m-dropoff').textContent = o.dropoff;
   document.getElementById('m-type').textContent = o.type === 'inside' ? ' Inside Campus' : ' Outside Campus';
-  document.getElementById('m-fee').textContent = o.fee;
+  document.getElementById('m-fee').value = o.fee;
   document.getElementById('m-time').textContent = o.time;
   document.getElementById('m-status').value = o.status;
   document.getElementById('modal-overlay').classList.add('open');
@@ -890,19 +1067,77 @@ function closeModal() {
 
 async function saveModal() {
   const newStatus = document.getElementById('m-status').value;
-  const ok = await updateOrderStatusDB(modalOrderId, newStatus);
+  const newFee = document.getElementById('m-fee').value;
+  const ok = await updateOrderDB(modalOrderId, { status: newStatus, fee: newFee });
   if (ok) {
-    const o = orders.find(x=>x.id===modalOrderId);
-    if (o) o.status = newStatus;
+    const o = orders.find(x=>String(x.id)===String(modalOrderId));
+    if (o) { o.status = newStatus; o.fee = newFee; }
     renderAll();
-    showToast(' Status updated', 'success');
+    showToast(' Order updated', 'success');
     closeModal();
   }
 }
 
+function openCreateModal() {
+  document.getElementById('c-name').value = '';
+  document.getElementById('c-phone').value = '';
+  document.getElementById('c-item').value = '';
+  document.getElementById('c-pickup').value = '';
+  document.getElementById('c-dropoff').value = '';
+  document.getElementById('c-type').value = 'inside';
+  document.getElementById('c-fee').value = '₦700';
+  document.getElementById('c-status').value = 'pending';
+  document.getElementById('modal-create-overlay').classList.add('open');
+}
+
+function closeCreateModal() {
+  document.getElementById('modal-create-overlay').classList.remove('open');
+}
+
+async function saveNewOrder() {
+  const btn = document.querySelector('#modal-create-overlay .modal-save');
+  btn.disabled = true; btn.textContent = 'CREATING...';
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' }) + ' · ' +
+    now.toLocaleDateString('en-NG', { day: 'numeric', month: 'short' });
+
+  const orderData = {
+    name: document.getElementById('c-name').value.trim(),
+    phone: document.getElementById('c-phone').value.trim(),
+    item: document.getElementById('c-item').value.trim(),
+    pickup: document.getElementById('c-pickup').value.trim(),
+    dropoff: document.getElementById('c-dropoff').value.trim(),
+    type: document.getElementById('c-type').value,
+    fee: document.getElementById('c-fee').value.trim(),
+    status: document.getElementById('c-status').value,
+    time: timeStr,
+    order_number: Math.floor(1000 + Math.random() * 9000).toString()
+  };
+
+  if (!orderData.name || !orderData.item) {
+    showToast('Name and item are required', 'error');
+    btn.disabled = false; btn.textContent = 'CREATE ORDER';
+    return;
+  }
+
+  if (_supaClient) {
+    const { data, error } = await _supaClient.from('orders').insert([orderData]).select();
+    if (error) {
+      showToast('Insert failed: ' + error.message, 'error');
+    } else {
+      orders.unshift(data[0]);
+      renderAll();
+      showToast(' Manual order created', 'success');
+      closeCreateModal();
+    }
+  }
+
+  btn.disabled = false; btn.textContent = 'CREATE ORDER';
+}
+
 //  SAVE 
 function saveOrders() {
-  localStorage.setItem('sxOrders', JSON.stringify(orders));
   renderAll();
 }
 
@@ -930,16 +1165,11 @@ function changePassword() {
   showToast(' Password updated', 'success');
 }
 
-function clearAll() {
-  if (confirm('Delete ALL order data? This cannot be undone.')) {
-    clearAllOrders();
-  }
-}
 
 //  EXPORT 
 function exportCSV() {
-  const headers = ['ID','Name','Phone','Item','Pickup','Dropoff','Type','Fee','Time','Status'];
-  const rows = orders.map(o=>[o.id,o.name,o.phone,o.item,o.pickup,o.dropoff,o.type,o.fee,o.time,o.status].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+  const headers = ['Order #','ID','Name','Phone','Item','Pickup','Dropoff','Type','Fee','Time','Status'];
+  const rows = orders.map(o=>[o.order_number||fmtId(o.id),o.id,o.name,o.phone,o.item,o.pickup,o.dropoff,o.type,o.fee,o.time,o.status].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
   const csv = [headers.join(','), ...rows].join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
