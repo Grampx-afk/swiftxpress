@@ -133,8 +133,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 24px
 .nav-wa:hover{background:#1a2a1a}
 .nav-order{background:var(--red);color:#fff;border:none;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;padding:7px 16px;border-radius:5px;cursor:pointer;text-transform:uppercase;transition:.15s}
 .nav-order:hover{background:var(--red-dark)}
-.admin-link{background:none;border:none;color:var(--gray2);font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:4px 8px;transition:.15s}
-.admin-link:hover{color:var(--white)}
+
 
 /*  HOMEPAGE  */
 #home{background:var(--black)}
@@ -271,43 +270,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 24px
 .sdot.idle{background:var(--border2)}
 .confirm-actions{display:flex;flex-direction:column;gap:10px}
 
-/*  ADMIN DASHBOARD  */
-#admin{background:var(--black)}
-.admin-header{background:#000;border-bottom:1px solid var(--border);padding:20px 24px;display:flex;align-items:center;justify-content:space-between}
-.admin-header h2{font-size:32px}
-.admin-header .sub{font-size:12px;color:var(--gray);margin-top:2px}
-.admin-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:20px 24px}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px}
-.stat-val{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;margin-bottom:4px}
-.stat-label{font-size:11px;color:var(--gray);font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase}
-.stat.pending .stat-val{color:var(--amber)}
-.stat.paid .stat-val{color:var(--green)}
-.stat.assigned .stat-val{color:#60a5fa}
-.stat.all .stat-val{color:var(--white)}
-.admin-table-wrap{padding:0 24px 32px;overflow-x:auto}
-.admin-table-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.admin-table-head h3{font-size:22px}
-.filter-row{display:flex;gap:6px}
-.filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--gray);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:1px;padding:6px 12px;border-radius:5px;cursor:pointer;transition:.15s;text-transform:uppercase}
-.filter-btn:hover,.filter-btn.active{color:var(--white);border-color:var(--gray2);background:var(--card2)}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:700px}
-th{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface)}
-td{padding:13px 14px;border-bottom:1px solid var(--border);color:var(--white);vertical-align:top}
-tr:hover td{background:rgba(255,255,255,.02)}
-.badge{display:inline-block;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:.5px;padding:3px 10px;border-radius:4px;text-transform:uppercase}
-.badge.pending{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
-.badge.paid{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
-.badge.assigned{background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.3)}
-.badge.delivered{background:rgba(139,92,246,.1);color:#a78bfa;border:1px solid rgba(139,92,246,.3)}
-.status-select{background:var(--surface);border:1px solid var(--border);color:var(--white);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;padding:5px 8px;border-radius:5px;cursor:pointer;letter-spacing:.5px;text-transform:uppercase}
-.admin-empty{text-align:center;padding:64px 24px;color:var(--gray)}
-.admin-empty .big{font-size:48px;margin-bottom:12px}
-.back-btn{background:var(--surface);border:1px solid var(--border);color:var(--gray);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:5px;cursor:pointer;transition:.15s;text-transform:uppercase}
-.back-btn:hover{color:var(--white);border-color:var(--gray2)}
-.btn-outline-red{width:100%;background:none;color:var(--red);border:1px solid var(--red-border);font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;padding:13px;border-radius:6px;cursor:pointer;transition:.15s}
-.btn-outline-red:hover{background:var(--red-dim)}
-.btn-outline-g{width:100%;background:none;color:#4caf50;border:1px solid #2a3d2a;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;padding:13px;border-radius:6px;cursor:pointer;transition:.15s}
-.btn-outline-g:hover{background:#1a2a1a}
+
 
 /* ── RESPONSIVE: index.html ── */
 
@@ -421,8 +384,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   /* Filter row */
   .filter-row{flex-wrap:wrap}
 
-  /* Admin stats (inline admin page) */
-  .admin-stats{grid-template-columns:1fr 1fr}
+
 }
 
 /* Very small phones */
@@ -747,69 +709,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
-<!--  ADMIN  -->
-<div id="admin" class="page">
-  <div class="admin-header">
-    <div>
-      <h2>ADMIN DASHBOARD</h2>
-      <div class="sub">SwiftXpress — Order Management</div>
-    </div>
-    <button class="back-btn" onclick="goHome()">← Back to Site</button>
-  </div>
 
-  <div class="admin-stats">
-    <div class="stat all">
-      <div class="stat-val" id="stat-all">0</div>
-      <div class="stat-label">Total Orders</div>
-    </div>
-    <div class="stat pending">
-      <div class="stat-val" id="stat-pending">0</div>
-      <div class="stat-label">Pending</div>
-    </div>
-    <div class="stat paid">
-      <div class="stat-val" id="stat-paid">0</div>
-      <div class="stat-label">Paid</div>
-    </div>
-    <div class="stat assigned">
-      <div class="stat-val" id="stat-delivered">0</div>
-      <div class="stat-label">Delivered</div>
-    </div>
-  </div>
-
-  <div class="admin-table-wrap">
-    <div class="admin-table-head">
-      <h3>ALL ORDERS</h3>
-      <div class="filter-row">
-        <button class="filter-btn active" onclick="filterOrders('all',this)">All</button>
-        <button class="filter-btn" onclick="filterOrders('pending',this)">Pending</button>
-        <button class="filter-btn" onclick="filterOrders('paid',this)">Paid</button>
-        <button class="filter-btn" onclick="filterOrders('assigned',this)">Assigned</button>
-        <button class="filter-btn" onclick="filterOrders('delivered',this)">Delivered</button>
-      </div>
-    </div>
-    <div id="admin-empty" class="admin-empty hidden">
-      <div class="big"></div>
-      <div>No orders yet. Orders will appear here when customers place them.</div>
-    </div>
-    <table id="orders-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Name</th>
-          <th>Phone</th>
-          <th>Order</th>
-          <th>Pickup</th>
-          <th>Delivery</th>
-          <th>Type</th>
-          <th>Fee</th>
-          <th>Time</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="orders-tbody"></tbody>
-    </table>
-  </div>
-</div>
 
 <script>
 //  SUPABASE 
@@ -984,10 +884,7 @@ async function loadOrders() {
   if (_supaClient) {
     const { data, error } = await _supaClient.from('orders').select('*').order('created_at', { ascending: false });
     if (!error && data) orders = data;
-  } else {
-    orders = JSON.parse(localStorage.getItem('sxOrders') || '[]');
   }
-  renderAdmin();
 }
 
 async function updateOrderStatus(id, status) {
@@ -1001,72 +898,7 @@ async function updateOrderStatus(id, status) {
   }
 }
 
-//  ADMIN 
-function saveOrders() {
-  localStorage.setItem('sxOrders', JSON.stringify(orders));
-  renderAdmin();
-}
 
-function renderAdmin() {
-  // Stats
-  document.getElementById('stat-all').textContent = orders.length;
-  document.getElementById('stat-pending').textContent = orders.filter(o=>o.status==='pending').length;
-  document.getElementById('stat-paid').textContent = orders.filter(o=>o.status==='paid').length;
-  document.getElementById('stat-delivered').textContent = orders.filter(o=>o.status==='delivered').length;
-
-  // Table
-  const filtered = activeFilter === 'all' ? orders : orders.filter(o=>o.status===activeFilter);
-  const tbody = document.getElementById('orders-tbody');
-  const empty = document.getElementById('admin-empty');
-  const table = document.getElementById('orders-table');
-
-  if (filtered.length === 0) {
-    empty.classList.remove('hidden');
-    table.style.display = 'none';
-  } else {
-    empty.classList.add('hidden');
-    table.style.display = '';
-    tbody.innerHTML = filtered.slice().reverse().map((o,i) => `
-      <tr>
-        <td style="color:var(--gray);font-size:11px">#${o.id}</td>
-        <td style="font-weight:500">${esc(o.name)}</td>
-        <td style="color:var(--gray)">${esc(o.phone)}</td>
-        <td style="max-width:180px;white-space:normal;line-height:1.4;color:var(--off)">${esc(o.item)}</td>
-        <td style="color:var(--gray);font-size:12px">${esc(o.pickup)}</td>
-        <td style="color:var(--gray);font-size:12px">${esc(o.dropoff)}</td>
-        <td><span style="font-size:11px;color:var(--gray)">${o.type==='inside'?'In':'Out'}</span></td>
-        <td style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--green)">${esc(o.fee)}</td>
-        <td style="font-size:11px;color:var(--gray);white-space:nowrap">${esc(o.time)}</td>
-        <td>
-          <select class="status-select" onchange="updateStatus('${o.id}',this.value)">
-            <option value="pending" ${o.status==='pending'?'selected':''}>Pending</option>
-            <option value="paid" ${o.status==='paid'?'selected':''}>Paid</option>
-            <option value="assigned" ${o.status==='assigned'?'selected':''}>Assigned</option>
-            <option value="delivered" ${o.status==='delivered'?'selected':''}>Delivered</option>
-          </select>
-          <span class="badge ${o.status}" style="margin-left:6px">${o.status}</span>
-        </td>
-      </tr>
-    `).join('');
-  }
-}
-
-function esc(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-async function updateStatus(id, status) {
-  await updateOrderStatus(id, status);
-  const o = orders.find(x=>x.id===id);
-  if (o) { o.status = status; renderAdmin(); }
-}
-
-function filterOrders(f, btn) {
-  activeFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderAdmin();
-}
 
 //  LOAD ORDERS 
 loadOrders();
