@@ -14,7 +14,8 @@ create table public.orders (
   fee text not null,                     -- Price string (e.g. '₦700')
   time text not null,                    -- Display time string from frontend
   status text default 'pending',          -- 'pending', 'paid', 'assigned', 'delivered'
-  order_number text                       -- Randomly generated order number (e.g. '829341')
+  order_number text,                      -- Randomly generated order number (e.g. '829341')
+  paystack_ref text                       -- Paystack transaction reference (set on verified payment)
 );
 
 -- 2. Enable Row Level Security (RLS)
@@ -34,3 +35,6 @@ create policy "Allow public read and update"
 
 -- 5. Enable Real-time (Optional, but recommended for live tracking)
 -- alter publication supabase_realtime add table public.orders;
+
+-- 6. If your orders table already exists, just add the paystack_ref column:
+-- alter table public.orders add column if not exists paystack_ref text;

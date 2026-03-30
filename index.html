@@ -9,6 +9,7 @@
     href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;600;700&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap"
     rel="stylesheet" />
   <script src="config.js"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -2179,7 +2180,7 @@
   <div id="payment" class="page">
     <div class="page-header">
       <h2>MAKE PAYMENT</h2>
-      <p>Transfer the exact amount to complete your order</p>
+      <p id="pay-page-sub">Secure payment via Paystack</p>
       <div class="progress" style="margin-top:24px">
         <div class="prog-step">
           <div class="prog-dot done"></div>
@@ -2203,10 +2204,12 @@
       </div>
     </div>
     <div class="pay-outer">
-      <div class="pay-card">
+
+      <!-- INSIDE CAMPUS: Paystack card -->
+      <div class="pay-card" id="pay-card-inside">
         <div class="pay-top">
           <h3>PAYMENT DETAILS</h3>
-          <p>Order #<span id="pay-id"></span> — Transfer exact amount below</p>
+          <p>Order #<span id="pay-id"></span> — Pay securely via Paystack</p>
         </div>
         <div class="pay-body">
           <div class="pay-notice" id="pay-notice-inside">
@@ -2214,34 +2217,43 @@
             <div class="pn-amt" id="pay-amount">₦700</div>
             <div class="pn-sub">Delivery fee (inside campus)</div>
           </div>
-          <div class="acct-row">
-            <div class="acct-info">
-              <div class="acct-label">Account Name</div>
-              <div class="acct-val">Swift Xpress Logistics</div>
+          <div style="margin-top:16px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">
+            <div style="font-size:12px;color:var(--gray);line-height:1.7">
+              <div style="margin-bottom:6px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:.5px;color:var(--white)">SECURE CHECKOUT</div>
+              You'll be redirected to Paystack's secure payment popup. Pay with your <strong>card, bank transfer, or USSD</strong>. Your payment is verified automatically — no screenshots needed.
             </div>
-          </div>
-          <div class="acct-row">
-            <div class="acct-info">
-              <div class="acct-label">Bank / OPay / PalmPay</div>
-              <div class="acct-val">OPay — 8012345678</div>
-            </div>
-            <button class="acct-copy" onclick="copyAcct(this,'8012345678')">Copy</button>
-          </div>
-          <div class="acct-row">
-            <div class="acct-info">
-              <div class="acct-label">Account Number</div>
-              <div class="acct-val" id="pay-acct-num">8012345678</div>
-            </div>
-            <button class="acct-copy" onclick="copyAcct(this,'8012345678')">Copy</button>
-          </div>
-          <div style="margin-top:8px;font-size:12px;color:var(--gray);line-height:1.5">
-            Transfer the <strong>exact</strong> amount. Send your payment screenshot on WhatsApp for fast confirmation.
           </div>
         </div>
         <div class="pay-footer">
-          <button class="btn-green" onclick="confirmPaid()"> I HAVE PAID</button>
+          <button class="btn-green" id="btn-pay-now" onclick="launchPaystack()"> PAY ₦700 SECURELY</button>
+          <div id="pay-verifying" style="display:none;text-align:center;padding:12px;font-size:13px;color:var(--gray)">
+            <span style="display:inline-block;width:14px;height:14px;border:2px solid var(--gray);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle"></span>
+            Verifying your payment…
+          </div>
         </div>
       </div>
+
+      <!-- OUTSIDE CAMPUS: WhatsApp flow card -->
+      <div class="pay-card" id="pay-card-outside" style="display:none">
+        <div class="pay-top">
+          <h3>OUTSIDE CAMPUS ORDER</h3>
+          <p>Order #<span id="pay-id-outside"></span> — Custom pricing</p>
+        </div>
+        <div class="pay-body">
+          <div class="pay-notice" style="background:var(--amber-dim);border-color:rgba(245,158,11,.3)">
+            <div class="pn-label">Amount to Pay</div>
+            <div class="pn-amt" style="color:var(--amber)">TBD</div>
+            <div class="pn-sub">Fee will be confirmed via WhatsApp</div>
+          </div>
+          <div style="margin-top:16px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--gray);line-height:1.7">
+            We've opened WhatsApp with your order details. Our team will confirm your delivery fee shortly. Once confirmed, you'll receive a Paystack payment link to complete your order.
+          </div>
+        </div>
+        <div class="pay-footer">
+          <button class="btn-green" onclick="resendOutsideWA()"> RESEND ON WHATSAPP</button>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -2419,31 +2431,125 @@
         return;
       }
 
-      const sid = fmtId(currentOrder.id);
-      document.getElementById('pay-id').textContent = sid;
+      const sid = currentOrder.order_number || fmtId(currentOrder.id);
 
       if (deliveryType === 'inside') {
+        // Show inside campus Paystack card, hide outside card
+        document.getElementById('pay-card-inside').style.display = '';
+        document.getElementById('pay-card-outside').style.display = 'none';
+        document.getElementById('pay-id').textContent = sid;
         document.getElementById('pay-amount').textContent = '₦700';
-        const n = document.getElementById('pay-notice-inside');
-        n.style.background = 'var(--surface)'; // Reset if it was amber
-        n.style.borderColor = 'var(--border)';
-        document.getElementById('pay-amount').style.color = 'var(--white)';
-        n.querySelector('.pn-sub').textContent = 'Delivery fee (inside campus)';
+        document.getElementById('btn-pay-now').style.display = '';
+        document.getElementById('pay-verifying').style.display = 'none';
       } else {
-        // For Outside Campus: Notify user about confirmed fee via WA
-        const n = document.getElementById('pay-notice-inside');
-        n.style.background = 'var(--amber-dim)';
-        n.style.borderColor = 'rgba(245,158,11,.3)';
-        document.getElementById('pay-amount').style.color = 'var(--amber)';
-        document.getElementById('pay-amount').textContent = 'TBD';
-        n.querySelector('.pn-sub').textContent = 'Fee will be confirmed via WhatsApp';
-        
-        // Auto-send order details for Outside
-        const msg = `Hi SwiftXpress! I'm placing an OUTSIDE order.\n\nOrder ID: #${sid}\nName: ${currentOrder.name}\nPhone: ${currentOrder.phone}\nOrder: ${currentOrder.item}\nPickup: ${currentOrder.pickup}\nDelivery: ${currentOrder.dropoff}\n\nPlease confirm the delivery fee.`;
-        openWA(msg);
+        // Outside campus — show WhatsApp card
+        document.getElementById('pay-card-inside').style.display = 'none';
+        document.getElementById('pay-card-outside').style.display = '';
+        document.getElementById('pay-id-outside').textContent = sid;
+        resendOutsideWA();
       }
 
       showPage('payment');
+    }
+
+    function resendOutsideWA() {
+      if (!currentOrder) return;
+      const sid = currentOrder.order_number || fmtId(currentOrder.id);
+      const msg = `Hi SwiftXpress! I'm placing an OUTSIDE campus order.\n\nOrder ID: #${sid}\nName: ${currentOrder.name}\nPhone: ${currentOrder.phone}\nOrder: ${currentOrder.item}\nPickup: ${currentOrder.pickup}\nDelivery: ${currentOrder.dropoff}\n\nPlease confirm the delivery fee.`;
+      openWA(msg);
+    }
+
+    function launchPaystack() {
+      if (!currentOrder || !currentOrder.id) return;
+
+      const key = window.PAYSTACK_PUBLIC_KEY;
+      if (!key || key === '%%PAYSTACK_PUBLIC_KEY%%') {
+        alert('Paystack is not configured yet. Please contact SwiftXpress support.');
+        return;
+      }
+
+      const phone = currentOrder.phone.replace(/\s/g, '');
+      // Paystack requires an email. Build one from the phone number.
+      const email = `${phone}@swiftxpress.pay`;
+      const ref = `SX-${currentOrder.id}-${Date.now()}`;
+
+      const btn = document.getElementById('btn-pay-now');
+      btn.disabled = true;
+      btn.textContent = 'Opening payment…';
+
+      const handler = PaystackPop.setup({
+        key: key,
+        email: email,
+        amount: 700 * 100, // kobo
+        currency: 'NGN',
+        ref: ref,
+        metadata: {
+          order_id: currentOrder.id,
+          order_number: currentOrder.order_number || fmtId(currentOrder.id),
+          customer_name: currentOrder.name,
+          customer_phone: currentOrder.phone,
+        },
+        callback: async function (response) {
+          // Payment popup closed with success — now verify server-side
+          btn.style.display = 'none';
+          document.getElementById('pay-verifying').style.display = 'block';
+          await verifyAndConfirmPayment(response.reference);
+        },
+        onClose: function () {
+          // User closed popup without paying
+          btn.disabled = false;
+          btn.textContent = ' PAY ₦700 SECURELY';
+        }
+      });
+
+      handler.openIframe();
+    }
+
+    async function verifyAndConfirmPayment(reference) {
+      try {
+        // Call our Supabase Edge Function to verify the payment server-side
+        const res = await fetch(
+          `${window.SUPABASE_URL}/functions/v1/verify-payment`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${window.SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({
+              reference: reference,
+              order_id: currentOrder.id
+            })
+          }
+        );
+
+        const result = await res.json();
+
+        if (res.ok && result.verified) {
+          // Payment confirmed by server — update local state and proceed
+          currentOrder.status = 'paid';
+          const msg = `Hi SwiftXpress! My payment is confirmed for Order #${currentOrder.order_number || fmtId(currentOrder.id)}.\n\nPaystack Ref: ${reference}\nName: ${currentOrder.name}\nPhone: ${currentOrder.phone}\nItem: ${currentOrder.item}\nPickup: ${currentOrder.pickup}\nDropoff: ${currentOrder.dropoff}\n\nThank you!`;
+          openWA(msg);
+          showPage('confirm');
+          startTracking(currentOrder.id);
+        } else {
+          // Verification failed
+          document.getElementById('pay-verifying').style.display = 'none';
+          const btn = document.getElementById('btn-pay-now');
+          btn.style.display = '';
+          btn.disabled = false;
+          btn.textContent = ' PAY ₦700 SECURELY';
+          alert('Payment verification failed: ' + (result.error || 'Please contact support with ref: ' + reference));
+        }
+      } catch (err) {
+        console.error('Verification error:', err);
+        document.getElementById('pay-verifying').style.display = 'none';
+        const btn = document.getElementById('btn-pay-now');
+        btn.style.display = '';
+        btn.disabled = false;
+        btn.textContent = ' PAY ₦700 SECURELY';
+        alert('Network error during verification. Please contact support with ref: ' + reference);
+      }
     }
 
     function copyAcct(btn, text) {
@@ -2451,23 +2557,6 @@
       btn.textContent = 'Copied!';
       btn.classList.add('copied');
       setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-    }
-
-    async function confirmPaid() {
-      const btn = document.querySelector('#payment .btn-green');
-      if (btn) { btn.disabled = true; btn.textContent = 'Confirming…'; }
-
-      await updateOrderStatus(currentOrder.id, 'paid');
-      currentOrder.status = 'paid';
-
-      if (btn) { btn.disabled = false; btn.textContent = ' I HAVE PAID'; }
-
-      // Send WhatsApp message with full details and order number (as requested)
-      const msg = `Hi SwiftXpress! I just paid for Order #${currentOrder.order_number || fmtId(currentOrder.id)}.\n\nOrder Details:\n- Name: ${currentOrder.name}\n- Phone: ${currentOrder.phone}\n- Item: ${currentOrder.item}\n- Pickup: ${currentOrder.pickup}\n- Delivery: ${currentOrder.dropoff}\n- Type: ${currentOrder.type.toUpperCase()}\n- Fee: ${currentOrder.fee}\n\nThank you!`;
-      openWA(msg);
-
-      showPage('confirm');
-      startTracking(currentOrder.id);
     }
 
     //  LIVE TRACKING 
