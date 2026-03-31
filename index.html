@@ -2051,10 +2051,42 @@
           </div>
         </div>
         <div class="field">
-          <label>What do you want?</label>
-          <textarea id="f-item"
-            placeholder="Describe exactly what you want — e.g. 2 plates of jollof rice from Mama Titi canteen, extra chicken..."></textarea>
-          <div class="err" id="err-item">Please describe your order</div>
+          <label>Category</label>
+          <div class="type-grid">
+            <div class="type-opt selected" id="cat-food" onclick="selectCat('food')">
+              <div class="type-name">Food</div>
+              <div class="type-fee">Structured items</div>
+            </div>
+            <div class="type-opt" id="cat-other" onclick="selectCat('other')">
+              <div class="type-name">Other Services</div>
+              <div class="type-fee">Goods, errands, etc.</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="sect-food">
+          <div class="field">
+            <label>What do you want to get?</label>
+            <div id="food-items-container">
+               <div class="food-item-row" style="display:flex;gap:8px;margin-bottom:8px">
+                 <input type="text" class="f-food-name" placeholder="Item name" style="flex:2" />
+                 <input type="number" class="f-food-qty" placeholder="Qty" style="flex:1" min="1" oninput="calcFoodTotal()" />
+                 <input type="number" class="f-food-price" placeholder="Price (₦)" style="flex:1" min="0" oninput="calcFoodTotal()" />
+               </div>
+            </div>
+            <button class="btn-outline-red" style="margin-top:8px;font-size:12px;padding:8px 16px;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500" onclick="addFoodItem()">+ Add another item</button>
+            <div style="margin-top:12px;font-size:14px;color:var(--white);font-weight:500" id="food-total-display">Items Total: ₦0</div>
+            <div class="err" id="err-food">Please add at least one valid item with name, quantity, and price.</div>
+          </div>
+        </div>
+
+        <div id="sect-other" class="hidden">
+          <div class="field">
+            <label>What do you want?</label>
+            <textarea id="f-item"
+              placeholder="Describe exactly what you want — e.g. Picking up my clothes from the dry cleaner..."></textarea>
+            <div class="err" id="err-item">Please describe your order</div>
+          </div>
         </div>
         <div class="row2">
           <div class="field">
@@ -2314,6 +2346,8 @@
     let orders = [];
     let currentOrder = {};
     let deliveryType = 'inside';
+    let orderCategory = 'food';
+    let foodItemsTotal = 0;
     let activeFilter = 'all';
     let trackInterval = null;
 
@@ -2335,12 +2369,48 @@
       window.open(`https://wa.me/${num}?text=${text}`, '_blank');
     }
 
-    //  DELIVERY TYPE 
+    //  DELIVERY TYPE & CATEGORY
     function selectType(t) {
       deliveryType = t;
       document.getElementById('opt-inside').classList.toggle('selected', t === 'inside');
       document.getElementById('opt-outside').classList.toggle('selected', t === 'outside');
       document.getElementById('outside-notice').classList.toggle('hidden', t !== 'outside');
+    }
+
+    function selectCat(c) {
+      orderCategory = c;
+      document.getElementById('cat-food').classList.toggle('selected', c === 'food');
+      document.getElementById('cat-other').classList.toggle('selected', c === 'other');
+      document.getElementById('sect-food').classList.toggle('hidden', c !== 'food');
+      document.getElementById('sect-other').classList.toggle('hidden', c !== 'other');
+    }
+
+    function addFoodItem() {
+      const cont = document.getElementById('food-items-container');
+      const row = document.createElement('div');
+      row.className = 'food-item-row';
+      row.style.display = 'flex';
+      row.style.gap = '8px';
+      row.style.marginBottom = '8px';
+      row.innerHTML = `
+        <input type="text" class="f-food-name" placeholder="Item name" style="flex:2" />
+        <input type="number" class="f-food-qty" placeholder="Qty" style="flex:1" min="1" oninput="calcFoodTotal()" />
+        <input type="number" class="f-food-price" placeholder="Price (₦)" style="flex:1" min="0" oninput="calcFoodTotal()" />
+        <button onclick="this.parentElement.remove(); calcFoodTotal();" style="flex:none;width:36px;height:42.5px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--gray);cursor:pointer;">X</button>
+      `;
+      cont.appendChild(row);
+    }
+
+    function calcFoodTotal() {
+      foodItemsTotal = 0;
+      const qtys = document.querySelectorAll('.f-food-qty');
+      const prices = document.querySelectorAll('.f-food-price');
+      for (let i = 0; i < qtys.length; i++) {
+        let q = parseInt(qtys[i].value) || 0;
+        let p = parseInt(prices[i].value) || 0;
+        foodItemsTotal += q * p;
+      }
+      document.getElementById('food-total-display').textContent = 'Items Total: ₦' + foodItemsTotal;
     }
 
     //  FORM VALIDATION 
@@ -2354,10 +2424,41 @@
     async function submitOrder() {
       const n = val('f-name', 'err-name', v => v.length > 1);
       const p = val('f-phone', 'err-phone', v => v.replace(/\s/g, '').length >= 10);
-      const i = val('f-item', 'err-item', v => v.length > 3);
       const pu = val('f-pickup', 'err-pickup', v => v.length > 1);
       const dr = val('f-dropoff', 'err-dropoff', v => v.length > 1);
-      if (!n || !p || !i || !pu || !dr) return;
+      
+      let itemDesc = '';
+      let iValid = true;
+
+      if (orderCategory === 'food') {
+        const names = document.querySelectorAll('.f-food-name');
+        const qtys = document.querySelectorAll('.f-food-qty');
+        const prices = document.querySelectorAll('.f-food-price');
+        let validItemsCount = 0;
+        let itemsArr = [];
+        
+        for (let k = 0; k < names.length; k++) {
+          let name = names[k].value.trim();
+          let qty = parseInt(qtys[k].value) || 0;
+          let price = parseInt(prices[k].value) || 0;
+          if (name && qty > 0 && price >= 0) {
+             validItemsCount++;
+             itemsArr.push(`${qty}x ${name} (₦${price * qty})`);
+          }
+        }
+        
+        if (validItemsCount === 0) {
+           iValid = false;
+        } else {
+           itemDesc = itemsArr.join(', ') + `\n[Items Total: ₦${foodItemsTotal}]`;
+        }
+        document.getElementById('err-food').style.display = iValid ? 'none' : 'block';
+      } else {
+        iValid = val('f-item', 'err-item', v => v.length > 3);
+        itemDesc = document.getElementById('f-item').value.trim();
+      }
+
+      if (!n || !p || !iValid || !pu || !dr) return;
 
       const btn = document.querySelector('#order .btn-full');
       if (btn) { btn.disabled = true; btn.textContent = 'Processing…'; }
@@ -2377,11 +2478,11 @@
       const orderData = {
         name: document.getElementById('f-name').value.trim(),
         phone: document.getElementById('f-phone').value.trim(),
-        item: document.getElementById('f-item').value.trim(),
+        item: itemDesc,
         pickup: document.getElementById('f-pickup').value.trim(),
         dropoff: document.getElementById('f-dropoff').value.trim(),
         type: deliveryType,
-        fee: deliveryType === 'inside' ? '₦700' : 'Via WhatsApp',
+        fee: deliveryType === 'inside' ? (orderCategory === 'food' ? `₦${700 + foodItemsTotal}` : '₦700') : 'Via WhatsApp',
         time: timeStr,
         status: 'pending',
         order_number: currentOrder && currentOrder.order_number ? currentOrder.order_number : generateOrderNumber()
@@ -2420,7 +2521,7 @@
       const feeEl = document.getElementById('sum-fee');
       if (deliveryType === 'inside') {
         feeEl.className = 'sum-val big';
-        feeEl.textContent = '₦700';
+        feeEl.textContent = orderCategory === 'food' ? `₦${700 + foodItemsTotal}` : '₦700';
       } else {
         feeEl.className = 'sum-val pending';
         feeEl.textContent = 'Will be sent via WhatsApp before payment';
@@ -2441,12 +2542,16 @@
       const sid = currentOrder.order_number || fmtId(currentOrder.id);
 
       if (deliveryType === 'inside') {
+        const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
+        const totalAmount = parseInt(totalAmountStr) || 700;
+        
         // Show inside campus Paystack card, hide outside card
         document.getElementById('pay-card-inside').style.display = '';
         document.getElementById('pay-card-outside').style.display = 'none';
         document.getElementById('pay-id').textContent = sid;
-        document.getElementById('pay-amount').textContent = '₦700';
+        document.getElementById('pay-amount').textContent = `₦${totalAmount}`;
         document.getElementById('btn-pay-now').style.display = '';
+        document.getElementById('btn-pay-now').textContent = ` PAY ₦${totalAmount} SECURELY`;
         document.getElementById('pay-verifying').style.display = 'none';
       } else {
         // Outside campus — show WhatsApp card
@@ -2488,10 +2593,13 @@
       btn.disabled = true;
       btn.textContent = 'Opening payment…';
 
+      const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
+      const totalAmount = parseInt(totalAmountStr) || 700;
+
       const handler = PaystackPop.setup({
         key: key,
         email: email,
-        amount: 700 * 100, // kobo
+        amount: totalAmount * 100, // kobo
         currency: 'NGN',
         ref: ref,
         metadata: {
@@ -2509,7 +2617,7 @@
         onClose: function () {
           // User closed popup without paying
           btn.disabled = false;
-          btn.textContent = ' PAY ₦700 SECURELY';
+          btn.textContent = ` PAY ₦${totalAmount} SECURELY`;
         }
       });
 
@@ -2549,7 +2657,9 @@
           const btn = document.getElementById('btn-pay-now');
           btn.style.display = '';
           btn.disabled = false;
-          btn.textContent = ' PAY ₦700 SECURELY';
+          const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
+          const totalAmount = parseInt(totalAmountStr) || 700;
+          btn.textContent = ` PAY ₦${totalAmount} SECURELY`;
           alert('Payment verification failed: ' + (result.error || 'Please contact support with ref: ' + reference));
         }
       } catch (err) {
@@ -2558,7 +2668,9 @@
         const btn = document.getElementById('btn-pay-now');
         btn.style.display = '';
         btn.disabled = false;
-        btn.textContent = ' PAY ₦700 SECURELY';
+        const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
+        const totalAmount = parseInt(totalAmountStr) || 700;
+        btn.textContent = ` PAY ₦${totalAmount} SECURELY`;
         alert('Network error during verification. Please contact support with ref: ' + reference);
       }
     }
