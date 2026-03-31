@@ -2191,9 +2191,25 @@
               <div class="sum-val" id="sum-type"></div>
             </div>
           </div>
+          <div class="sum-row hidden" id="row-food-total">
+            <div>
+              <div class="sum-key">Items Total</div>
+            </div>
+            <div>
+              <div class="sum-val" id="sum-food-total">₦0</div>
+            </div>
+          </div>
           <div class="sum-row">
             <div>
               <div class="sum-key">Delivery Fee</div>
+            </div>
+            <div>
+              <div class="sum-val" id="sum-delivery-fee">₦700</div>
+            </div>
+          </div>
+          <div class="sum-row">
+            <div>
+              <div class="sum-key">Total Amount</div>
             </div>
             <div id="sum-fee-wrap">
               <div class="sum-val big" id="sum-fee">₦700</div>
@@ -2640,10 +2656,25 @@
       document.getElementById('sum-type').textContent = deliveryType === 'inside' ? 'Inside Campus' : 'Outside Campus';
 
       const feeEl = document.getElementById('sum-fee');
+      const rowFood = document.getElementById('row-food-total');
+      const foodTotalEl = document.getElementById('sum-food-total');
+      const deliveryFeeEl = document.getElementById('sum-delivery-fee');
+
       if (deliveryType === 'inside') {
         feeEl.className = 'sum-val big';
-        feeEl.textContent = orderCategory === 'food' ? `₦${700 + foodItemsTotal}` : '₦700';
+        if (orderCategory === 'food') {
+          rowFood.classList.remove('hidden');
+          foodTotalEl.textContent = `₦${foodItemsTotal}`;
+          deliveryFeeEl.textContent = '₦700';
+          feeEl.textContent = `₦${700 + foodItemsTotal}`;
+        } else {
+          rowFood.classList.add('hidden');
+          deliveryFeeEl.textContent = '₦700';
+          feeEl.textContent = '₦700';
+        }
       } else {
+        rowFood.classList.add('hidden');
+        deliveryFeeEl.textContent = 'TBD';
         feeEl.className = 'sum-val pending';
         feeEl.textContent = 'Will be sent via WhatsApp before payment';
       }
