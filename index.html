@@ -2105,7 +2105,7 @@
           <div class="type-grid">
             <div class="type-opt selected" id="opt-inside" onclick="selectType('inside')">
               <div class="type-name">Inside Campus</div>
-              <div class="type-fee">Fixed fee — ₦700</div>
+              <div class="type-fee" id="txt-inside-fee">Fixed fee — ₦700</div>
             </div>
             <div class="type-opt" id="opt-outside" onclick="selectType('outside')">
               <div class="type-name">Outside Campus</div>
@@ -2482,6 +2482,8 @@
     //  STATE 
     let orders = [];
     let currentOrder = {};
+    const gSettings = JSON.parse(localStorage.getItem('sxSettings') || '{}');
+    const INSIDE_FEE = gSettings['s-fee'] ? parseInt(gSettings['s-fee']) : 700;
     let deliveryType = 'inside';
     let orderCategory = 'food';
     let foodItemsTotal = 0;
@@ -2619,7 +2621,7 @@
         pickup: document.getElementById('f-pickup').value.trim(),
         dropoff: document.getElementById('f-dropoff').value.trim(),
         type: deliveryType,
-        fee: deliveryType === 'inside' ? (orderCategory === 'food' ? `₦${700 + foodItemsTotal}` : '₦700') : 'Via WhatsApp',
+        fee: deliveryType === 'inside' ? (orderCategory === 'food' ? `₦${INSIDE_FEE + foodItemsTotal}` : `₦${INSIDE_FEE}`) : 'Via WhatsApp',
         time: timeStr,
         status: 'pending',
         order_number: currentOrder && currentOrder.order_number ? currentOrder.order_number : generateOrderNumber()
@@ -2665,12 +2667,12 @@
         if (orderCategory === 'food') {
           rowFood.classList.remove('hidden');
           foodTotalEl.textContent = `₦${foodItemsTotal}`;
-          deliveryFeeEl.textContent = '₦700';
-          feeEl.textContent = `₦${700 + foodItemsTotal}`;
+          deliveryFeeEl.textContent = `₦${INSIDE_FEE}`;
+          feeEl.textContent = `₦${INSIDE_FEE + foodItemsTotal}`;
         } else {
           rowFood.classList.add('hidden');
-          deliveryFeeEl.textContent = '₦700';
-          feeEl.textContent = '₦700';
+          deliveryFeeEl.textContent = `₦${INSIDE_FEE}`;
+          feeEl.textContent = `₦${INSIDE_FEE}`;
         }
       } else {
         rowFood.classList.add('hidden');
@@ -2694,8 +2696,8 @@
       const sid = currentOrder.order_number || fmtId(currentOrder.id);
 
       if (deliveryType === 'inside') {
-        const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
-        const totalAmount = parseInt(totalAmountStr) || 700;
+        const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : `${INSIDE_FEE}`;
+        const totalAmount = parseInt(totalAmountStr) || INSIDE_FEE;
         
         // Show inside campus Paystack card, hide outside card
         document.getElementById('pay-card-inside').style.display = '';
@@ -2740,13 +2742,12 @@
       // Paystack requires an email. Build one from the phone number.
       const email = `${phone}@swiftxpress.ng`;
       const ref = `SX-${currentOrder.id}-${Date.now()}`;
-
       const btn = document.getElementById('btn-pay-now');
       btn.disabled = true;
       btn.textContent = 'Opening payment…';
 
-      const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
-      const totalAmount = parseInt(totalAmountStr) || 700;
+      const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : `${INSIDE_FEE}`;
+      const totalAmount = parseInt(totalAmountStr) || INSIDE_FEE;
 
       const handler = PaystackPop.setup({
         key: key,
@@ -2809,8 +2810,8 @@
           const btn = document.getElementById('btn-pay-now');
           btn.style.display = '';
           btn.disabled = false;
-          const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
-          const totalAmount = parseInt(totalAmountStr) || 700;
+          const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : `${INSIDE_FEE}`;
+          const totalAmount = parseInt(totalAmountStr) || INSIDE_FEE;
           btn.textContent = ` PAY ₦${totalAmount} SECURELY`;
           showFailedReceipt(reference, result.error || 'Payment could not be verified. Please try again or contact support.');
         }
@@ -2820,8 +2821,8 @@
         const btn = document.getElementById('btn-pay-now');
         btn.style.display = '';
         btn.disabled = false;
-        const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
-        const totalAmount = parseInt(totalAmountStr) || 700;
+        const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : `${INSIDE_FEE}`;
+        const totalAmount = parseInt(totalAmountStr) || INSIDE_FEE;
         btn.textContent = ` PAY ₦${totalAmount} SECURELY`;
         showFailedReceipt(reference, 'Network error during verification. Please contact support.');
       }
@@ -2829,8 +2830,8 @@
 
     function showSuccessReceipt(reference) {
       const now = new Date().toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-      const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
-      const totalAmount = parseInt(totalAmountStr) || 700;
+      const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : `${INSIDE_FEE}`;
+      const totalAmount = parseInt(totalAmountStr) || INSIDE_FEE;
 
       document.getElementById('rcpt-order-id').textContent = `#${currentOrder.order_number || fmtId(currentOrder.id)}`;
       document.getElementById('rcpt-ref').textContent = reference;
@@ -2847,8 +2848,8 @@
 
     function showFailedReceipt(reference, reason) {
       const now = new Date().toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-      const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
-      const totalAmount = parseInt(totalAmountStr) || 700;
+      const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : `${INSIDE_FEE}`;
+      const totalAmount = parseInt(totalAmountStr) || INSIDE_FEE;
 
       document.getElementById('fail-order-id').textContent = `#${currentOrder.order_number || fmtId(currentOrder.id)}`;
       document.getElementById('fail-ref').textContent = reference || 'N/A';
@@ -2867,8 +2868,8 @@
       if (btn) {
         btn.style.display = '';
         btn.disabled = false;
-        const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
-        const totalAmount = parseInt(totalAmountStr) || 700;
+        const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : `${INSIDE_FEE}`;
+        const totalAmount = parseInt(totalAmountStr) || INSIDE_FEE;
         btn.textContent = ` PAY ₦${totalAmount} SECURELY`;
       }
       document.getElementById('pay-verifying').style.display = 'none';
@@ -3008,6 +3009,16 @@
       _showPageCore(id);
       setTimeout(initReveal, 50);
     };
+    // Update hardcoded 700 to dynamic INSIDE_FEE
+    document.addEventListener('DOMContentLoaded', () => {
+      const e1 = document.getElementById('txt-inside-fee'); if (e1) e1.textContent = `Fixed fee — ₦${INSIDE_FEE}`;
+      const e2 = document.getElementById('sum-delivery-fee'); if (e2) e2.textContent = `₦${INSIDE_FEE}`;
+      const e3 = document.getElementById('sum-fee'); if (e3) e3.textContent = `₦${INSIDE_FEE}`;
+      const e4 = document.getElementById('pay-amount'); if (e4) e4.textContent = `₦${INSIDE_FEE}`;
+      const e5 = document.getElementById('btn-pay-now'); if (e5) e5.textContent = ` PAY ₦${INSIDE_FEE} SECURELY`;
+      const e6 = document.getElementById('rcpt-amount'); if (e6) e6.textContent = `₦${INSIDE_FEE}`;
+      const e7 = document.getElementById('fail-amount'); if (e7) e7.textContent = `₦${INSIDE_FEE}`;
+    });
   </script>
   <!-- FLOATING WHATSAPP BUTTON -->
   <div class="wa-float" onclick="openWA()">
