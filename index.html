@@ -2296,24 +2296,145 @@
     </div>
   </div>
 
-  <!--  CONFIRMATION  -->
+  <!--  SUCCESS RECEIPT  -->
   <div id="confirm" class="page">
     <div class="confirm-inner">
       <div class="confirm-icon"></div>
-      <h2>ORDER RECEIVED!</h2>
-      <p class="sub">Your order is in our system. We're on it — expect a WhatsApp message shortly to confirm payment and
-        assign your rider.</p>
+      <h2>PAYMENT CONFIRMED!</h2>
+      <p class="sub">Your payment was successful and your order is now active.</p>
+
+      <!-- Receipt Card -->
+      <div style="background:var(--card);border:1px solid var(--green-border);border-radius:12px;margin:24px 0;overflow:hidden;text-align:left;">
+        <div style="background:var(--green-dim);padding:14px 18px;border-bottom:1px solid var(--green-border);display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">✅</span>
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--green)">PAYMENT RECEIPT</div>
+            <div style="font-size:11px;color:var(--gray)">Keep this for your records</div>
+          </div>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <span style="font-size:12px;color:var(--gray)">Status</span>
+            <span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;color:var(--green);background:var(--green-dim);border:1px solid var(--green-border);padding:3px 10px;border-radius:20px">PAID ✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Order ID</span>
+            <span style="font-size:13px;font-weight:500" id="rcpt-order-id">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Paystack Ref</span>
+            <span style="font-size:11px;font-weight:500;color:var(--gray)" id="rcpt-ref">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Name</span>
+            <span style="font-size:13px;font-weight:500" id="rcpt-name">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Phone</span>
+            <span style="font-size:13px;font-weight:500" id="rcpt-phone">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Item</span>
+            <span style="font-size:13px;font-weight:500;text-align:right;max-width:60%" id="rcpt-item">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Pickup</span>
+            <span style="font-size:13px;font-weight:500" id="rcpt-pickup">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Dropoff</span>
+            <span style="font-size:13px;font-weight:500" id="rcpt-dropoff">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border)">
+            <span style="font-size:12px;color:var(--gray)">Amount Paid</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--green)" id="rcpt-amount">₦700</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Date & Time</span>
+            <span style="font-size:12px;color:var(--gray)" id="rcpt-time">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Tracking -->
+      <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;color:var(--gray);margin-bottom:10px;">LIVE ORDER STATUS</div>
       <div class="status-list" id="track-list">
         <div class="status-item" id="tr-received"><span class="sdot active"></span>Order received in system</div>
-        <div class="status-item" id="tr-paid"><span class="sdot idle"></span>Awaiting payment confirmation</div>
+        <div class="status-item" id="tr-paid"><span class="sdot idle"></span>Payment confirmed</div>
         <div class="status-item" id="tr-assigned"><span class="sdot idle"></span>Rider assignment pending</div>
         <div class="status-item" id="tr-delivered"><span class="sdot idle"></span>Out for delivery</div>
       </div>
+
       <div class="confirm-actions">
         <button class="btn-green" onclick="openWA()"
           style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;padding:14px;border-radius:6px;border:none;cursor:pointer;width:100%;background:var(--green);color:#000">
           CHAT US ON WHATSAPP</button>
         <button class="btn-outline-red" onclick="startOrder()">Place Another Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!--  FAILED PAYMENT RECEIPT  -->
+  <div id="pay-failed" class="page">
+    <div class="confirm-inner">
+      <div style="font-size:64px;margin-bottom:16px;animation:floatY 3s ease-in-out infinite">❌</div>
+      <h2 style="color:var(--red)">PAYMENT FAILED</h2>
+      <p class="sub">Your payment could not be completed. No money has been deducted from your account.</p>
+
+      <!-- Failed Receipt Card -->
+      <div style="background:var(--card);border:1px solid var(--red-border);border-radius:12px;margin:24px 0;overflow:hidden;text-align:left;">
+        <div style="background:var(--red-dim);padding:14px 18px;border-bottom:1px solid var(--red-border);display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">🧾</span>
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--red)">FAILED TRANSACTION</div>
+            <div style="font-size:11px;color:var(--gray)">Payment was not processed</div>
+          </div>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <span style="font-size:12px;color:var(--gray)">Status</span>
+            <span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;color:var(--red);background:var(--red-dim);border:1px solid var(--red-border);padding:3px 10px;border-radius:20px">FAILED ✗</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Order ID</span>
+            <span style="font-size:13px;font-weight:500" id="fail-order-id">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Reference</span>
+            <span style="font-size:11px;color:var(--gray)" id="fail-ref">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Name</span>
+            <span style="font-size:13px;font-weight:500" id="fail-name">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Amount</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--red)" id="fail-amount">₦700</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Reason</span>
+            <span style="font-size:12px;color:var(--amber);text-align:right;max-width:65%" id="fail-reason">Payment was cancelled or declined</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--gray)">Date & Time</span>
+            <span style="font-size:12px;color:var(--gray)" id="fail-time">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:14px;background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);border-radius:8px;font-size:12px;color:var(--gray);line-height:1.7;margin-bottom:20px;text-align:left">
+        <strong style="color:var(--amber)">What to do next?</strong><br>
+        Your order is still saved. Try paying again below, or contact us on WhatsApp if you need help.
+      </div>
+
+      <div class="confirm-actions">
+        <button class="btn-green" id="btn-retry-pay" onclick="retryPayment()"
+          style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;padding:14px;border-radius:6px;border:none;cursor:pointer;width:100%;background:var(--green);color:#000">
+          TRY AGAIN</button>
+        <button class="btn-wa" onclick="openWA()"
+          style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;padding:12px;border-radius:6px;cursor:pointer;width:100%">
+          CONTACT US ON WHATSAPP</button>
+        <button class="btn-outline-red" onclick="startOrder()">Place a New Order</button>
       </div>
     </div>
   </div>
@@ -2615,9 +2736,10 @@
           verifyAndConfirmPayment(response.reference);
         },
         onClose: function () {
-          // User closed popup without paying
+          // User closed popup without completing payment
           btn.disabled = false;
           btn.textContent = ` PAY ₦${totalAmount} SECURELY`;
+          showFailedReceipt(ref, 'Payment was cancelled — you closed the payment window without completing it.');
         }
       });
 
@@ -2626,7 +2748,6 @@
 
     async function verifyAndConfirmPayment(reference) {
       try {
-        // Call our Supabase Edge Function to verify the payment server-side
         const res = await fetch(
           `${window.SUPABASE_URL}/functions/v1/verify-payment`,
           {
@@ -2645,14 +2766,14 @@
         const result = await res.json();
 
         if (res.ok && result.verified) {
-          // Payment confirmed by server — update local state and proceed
+          // ✅ Payment confirmed — show success receipt
           currentOrder.status = 'paid';
+          showSuccessReceipt(reference);
           const msg = `Hi SwiftXpress! My payment is confirmed for Order #${currentOrder.order_number || fmtId(currentOrder.id)}.\n\nPaystack Ref: ${reference}\nName: ${currentOrder.name}\nPhone: ${currentOrder.phone}\nItem: ${currentOrder.item}\nPickup: ${currentOrder.pickup}\nDropoff: ${currentOrder.dropoff}\n\nThank you!`;
           openWA(msg);
-          showPage('confirm');
           startTracking(currentOrder.id);
         } else {
-          // Verification failed
+          // ❌ Verification failed — show failed receipt
           document.getElementById('pay-verifying').style.display = 'none';
           const btn = document.getElementById('btn-pay-now');
           btn.style.display = '';
@@ -2660,7 +2781,7 @@
           const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
           const totalAmount = parseInt(totalAmountStr) || 700;
           btn.textContent = ` PAY ₦${totalAmount} SECURELY`;
-          alert('Payment verification failed: ' + (result.error || 'Please contact support with ref: ' + reference));
+          showFailedReceipt(reference, result.error || 'Payment could not be verified. Please try again or contact support.');
         }
       } catch (err) {
         console.error('Verification error:', err);
@@ -2671,8 +2792,55 @@
         const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
         const totalAmount = parseInt(totalAmountStr) || 700;
         btn.textContent = ` PAY ₦${totalAmount} SECURELY`;
-        alert('Network error during verification. Please contact support with ref: ' + reference);
+        showFailedReceipt(reference, 'Network error during verification. Please contact support.');
       }
+    }
+
+    function showSuccessReceipt(reference) {
+      const now = new Date().toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
+      const totalAmount = parseInt(totalAmountStr) || 700;
+
+      document.getElementById('rcpt-order-id').textContent = `#${currentOrder.order_number || fmtId(currentOrder.id)}`;
+      document.getElementById('rcpt-ref').textContent = reference;
+      document.getElementById('rcpt-name').textContent = currentOrder.name;
+      document.getElementById('rcpt-phone').textContent = currentOrder.phone;
+      document.getElementById('rcpt-item').textContent = currentOrder.item;
+      document.getElementById('rcpt-pickup').textContent = currentOrder.pickup;
+      document.getElementById('rcpt-dropoff').textContent = currentOrder.dropoff;
+      document.getElementById('rcpt-amount').textContent = `₦${totalAmount}`;
+      document.getElementById('rcpt-time').textContent = now;
+
+      showPage('confirm');
+    }
+
+    function showFailedReceipt(reference, reason) {
+      const now = new Date().toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
+      const totalAmount = parseInt(totalAmountStr) || 700;
+
+      document.getElementById('fail-order-id').textContent = `#${currentOrder.order_number || fmtId(currentOrder.id)}`;
+      document.getElementById('fail-ref').textContent = reference || 'N/A';
+      document.getElementById('fail-name').textContent = currentOrder.name || '—';
+      document.getElementById('fail-amount').textContent = `₦${totalAmount}`;
+      document.getElementById('fail-reason').textContent = reason || 'Payment was not completed';
+      document.getElementById('fail-time').textContent = now;
+
+      showPage('pay-failed');
+    }
+
+    function retryPayment() {
+      showPage('payment');
+      // Reset the pay button
+      const btn = document.getElementById('btn-pay-now');
+      if (btn) {
+        btn.style.display = '';
+        btn.disabled = false;
+        const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : '700';
+        const totalAmount = parseInt(totalAmountStr) || 700;
+        btn.textContent = ` PAY ₦${totalAmount} SECURELY`;
+      }
+      document.getElementById('pay-verifying').style.display = 'none';
     }
 
     function copyAcct(btn, text) {
