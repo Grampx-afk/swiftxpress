@@ -9,7 +9,7 @@
     href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;600;700&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap"
     rel="stylesheet" />
   <script src="config.js"></script>
-  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <script src="https://js.paystack.co/v1/inline.js" defer></script>
   <style>
     * {
       box-sizing: border-box;
@@ -2217,17 +2217,22 @@
             <div class="pn-amt" id="pay-amount">₦700</div>
             <div class="pn-sub">Delivery fee (inside campus)</div>
           </div>
-          <div style="margin-top:16px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">
+          <div
+            style="margin-top:16px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">
             <div style="font-size:12px;color:var(--gray);line-height:1.7">
-              <div style="margin-bottom:6px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:.5px;color:var(--white)">SECURE CHECKOUT</div>
-              You'll be redirected to Paystack's secure payment popup. Pay with your <strong>card, bank transfer, or USSD</strong>. Your payment is verified automatically — no screenshots needed.
+              <div
+                style="margin-bottom:6px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:.5px;color:var(--white)">
+                SECURE CHECKOUT</div>
+              You'll be redirected to Paystack's secure payment popup. Pay with your <strong>card, bank transfer, or
+                USSD</strong>. Your payment is verified automatically — no screenshots needed.
             </div>
           </div>
         </div>
         <div class="pay-footer">
           <button class="btn-green" id="btn-pay-now" onclick="launchPaystack()"> PAY ₦700 SECURELY</button>
           <div id="pay-verifying" style="display:none;text-align:center;padding:12px;font-size:13px;color:var(--gray)">
-            <span style="display:inline-block;width:14px;height:14px;border:2px solid var(--gray);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle"></span>
+            <span
+              style="display:inline-block;width:14px;height:14px;border:2px solid var(--gray);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle"></span>
             Verifying your payment…
           </div>
         </div>
@@ -2245,8 +2250,10 @@
             <div class="pn-amt" style="color:var(--amber)">TBD</div>
             <div class="pn-sub">Fee will be confirmed via WhatsApp</div>
           </div>
-          <div style="margin-top:16px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--gray);line-height:1.7">
-            We've opened WhatsApp with your order details. Our team will confirm your delivery fee shortly. Once confirmed, you'll receive a Paystack payment link to complete your order.
+          <div
+            style="margin-top:16px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--gray);line-height:1.7">
+            We've opened WhatsApp with your order details. Our team will confirm your delivery fee shortly. Once
+            confirmed, you'll receive a Paystack payment link to complete your order.
           </div>
         </div>
         <div class="pay-footer">
