@@ -64,34 +64,63 @@ serve(async (req: Request) => {
     }
 
     // 4. Parse the expected amount from the fee field (e.g. "₦1400" → 1400)
-    // The fee field stores values like "₦700", "₦1400", "Via WhatsApp", etc.
-    const feeStr = order.fee;
-    if (!feeStr) {
-      console.error("Order fee is missing for order:", order_id);
-      return new Response(JSON.stringify({ error: "Order fee is not set" }), {
+    let feeStr: string | null | undefined = order.fee;
+    let expectedNaira = 0;
+
+    // Log the current state for debugging
+    console.log(`[v2.2] Processing Order ID: ${order_id}. Initial fee from DB: "${feeStr}"`);
+
+    // FALLBACK: If order fee is missing or placeholder, check the 'settings' table
+    if (!feeStr || (typeof feeStr === 'string' && (feeStr === "₦..." || feeStr.trim() === ""))) {
+      console.warn(`[v2.2] Order fee missing for order: ${order_id}. Fetching live default...`);
+      const { data: setting, error: settingsError } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "delivery_fee")
+        .single();
+      
+      if (!settingsError && setting) {
+        feeStr = setting.value;
+        console.log(`[v2.2] Using fallback fee from settings: "${feeStr}"`);
+      }
+    }
+
+    // Handle "Via WhatsApp" or other non-numeric statuses
+    const currentFee = typeof feeStr === 'string' ? feeStr.toLowerCase() : "";
+    if (currentFee.includes("whatsapp")) {
+      console.warn(`[v2.2] Order ${order_id} is a WhatsApp delivery. Automatic payment not possible.`);
+      return new Response(JSON.stringify({ 
+        error: "[v2.2] This order requires custom pricing via WhatsApp. Please contact support." 
+      }), {
         status: 400,
         headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       });
     }
 
-    const parsedFee = parseInt(feeStr.replace(/[^0-9]/g, ""), 10);
-    if (isNaN(parsedFee) || parsedFee <= 0) {
-      console.error("Invalid fee amount for order:", order_id, "Fee:", feeStr);
-      return new Response(JSON.stringify({ error: "Order fee is invalid or not a fixed amount" }), {
+    if (typeof feeStr === 'string') {
+      // Extract only digits from the fee string
+      const cleanFee = feeStr.replace(/[^0-9]/g, "");
+      expectedNaira = parseInt(cleanFee, 10);
+    }
+
+    if (!expectedNaira || expectedNaira <= 0) {
+      console.error(`[v2.2] CRITICAL ERROR: Could not parse fee for order: ${order_id}. Raw value: "${feeStr}"`);
+      return new Response(JSON.stringify({ 
+        error: "[v2.2] ERROR: Order fee could not be determined. Please contact support." 
+      }), {
         status: 400,
         headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       });
     }
 
-    const expectedNaira = parsedFee;
     const expectedKobo = expectedNaira * 100;
 
     // 5. Verify with Paystack API
     const paystackSecret = Deno.env.get("PAYSTACK_SECRET_KEY");
     if (!paystackSecret) {
-      console.error("PAYSTACK_SECRET_KEY is not set");
+      console.error("[v2.2] CONFIG ERROR: PAYSTACK_SECRET_KEY is not set in Supabase Secrets.");
       return new Response(
-        JSON.stringify({ error: "Payment service not configured" }),
+        JSON.stringify({ error: "[v2.2] ERROR: Shared payment secret not configured." }),
         { status: 500, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } }
       );
     }
@@ -110,11 +139,11 @@ serve(async (req: Request) => {
 
     // 6. Check Paystack response status
     if (!paystackData.status || paystackData.data?.status !== "success") {
-      console.warn("Paystack verification failed:", paystackData);
+      console.warn(`[v2.2] Paystack verification failed for Ref: ${reference}.`, paystackData);
       return new Response(
         JSON.stringify({
           verified: false,
-          error: "Payment not successful. Status: " + (paystackData.data?.status || "unknown"),
+          error: "[v2.2] Payment not successful. Status: " + (paystackData.data?.status || "unknown"),
         }),
         { status: 200, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } }
       );
@@ -124,11 +153,12 @@ serve(async (req: Request) => {
 
     // 7. Validate the paid amount matches the order's actual total (prevents underpayment attacks)
     if (txAmount < expectedKobo) {
-      console.warn(`Amount mismatch: got ${txAmount} kobo, expected ${expectedKobo} kobo`);
+      const paidNaira = txAmount / 100;
+      console.warn(`[v2.2] AMOUNT MISMATCH for Order ${order_id}: Paid ₦${paidNaira}, Expected ₦${expectedNaira}`);
       return new Response(
         JSON.stringify({
           verified: false,
-          error: `Amount paid (₦${txAmount / 100}) does not match order total (₦${expectedNaira})`,
+          error: `[v2.2] Paid amount (₦${paidNaira}) is less than total required (₦${expectedNaira}).`,
         }),
         { status: 200, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } }
       );
