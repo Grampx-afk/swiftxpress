@@ -2696,6 +2696,7 @@
     let trackInterval = null;
 
     // Load live delivery fee from Supabase (overrides localStorage)
+    let liveFeeLoaded = false;
     async function loadLiveFee() {
       await supabaseInit;
       if (!_supaClient) return;
@@ -2708,6 +2709,7 @@
         const liveFee = parseInt(data.value);
         if (!isNaN(liveFee) && liveFee > 0) {
           INSIDE_FEE = liveFee;
+          liveFeeLoaded = true;
           // Update any visible fee elements
           const e1 = document.getElementById('txt-inside-fee'); if (e1) e1.textContent = `Fixed fee — ₦${INSIDE_FEE}`;
           const e2 = document.getElementById('sum-delivery-fee'); if (e2) e2.textContent = `₦${INSIDE_FEE}`;
@@ -2719,7 +2721,7 @@
         }
       }
     }
-    loadLiveFee();
+    const liveFeePromise = loadLiveFee();
 
     const fmtId = (id) => String(id).padStart(3, '0');
     const generateOrderNumber = () => Math.floor(1000 + Math.random() * 9000).toString();
@@ -2735,8 +2737,12 @@
       // Show T&C modal before proceeding to order form
       document.getElementById('tnc-modal').classList.add('open');
     }
-    function tncAgree() {
+    async function tncAgree() {
       document.getElementById('tnc-modal').classList.remove('open');
+      // Always fetch the latest fee right before the customer fills the form
+      await loadLiveFee();
+      // Update the fee display on the order form
+      const e1 = document.getElementById('txt-inside-fee'); if (e1) e1.textContent = `Fixed fee — ₦${INSIDE_FEE}`;
       showPage('order');
     }
     function tncDisagree() {
@@ -2844,8 +2850,11 @@
       const btn = document.querySelector('#order .btn-full');
       if (btn) { btn.disabled = true; btn.textContent = 'Processing…'; }
 
-      // Wait for supabase to be ready
+      // Ensure we have the latest fee from Supabase before saving the order
+      await liveFeePromise;
+      await loadLiveFee();
       await supabaseInit;
+
       if (!_supaClient) {
         alert('System error: Database connection is unavailable.');
         if (btn) { btn.disabled = false; btn.textContent = 'REVIEW ORDER →'; }
