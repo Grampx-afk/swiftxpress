@@ -42,7 +42,36 @@ serve(async (req: Request) => {
       );
     }
 
-    // 2. Verify with Paystack API
+    // 2. Set up Supabase client (service role — bypasses RLS)
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // 3. Fetch the order from DB to get the actual expected fee
+    const { data: order, error: fetchError } = await supabase
+      .from("orders")
+      .select("id, fee, status")
+      .eq("id", order_id)
+      .single();
+
+    if (fetchError || !order) {
+      console.error("Order fetch error:", fetchError);
+      return new Response(
+        JSON.stringify({ error: "Order not found" }),
+        { status: 404, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 4. Parse the expected amount from the fee field (e.g. "₦1400" → 1400)
+    // The fee field stores values like "₦700", "₦1400", "Via WhatsApp", etc.
+    const feeStr = order.fee ?? "₦700";
+    const parsedFee = parseInt(feeStr.replace(/[^0-9]/g, ""), 10);
+    // Fall back to 700 if parsing fails (e.g. "Via WhatsApp" orders shouldn't reach here)
+    const expectedNaira = isNaN(parsedFee) || parsedFee <= 0 ? 700 : parsedFee;
+    const expectedKobo = expectedNaira * 100;
+
+    // 5. Verify with Paystack API
     const paystackSecret = Deno.env.get("PAYSTACK_SECRET_KEY");
     if (!paystackSecret) {
       console.error("PAYSTACK_SECRET_KEY is not set");
@@ -64,7 +93,7 @@ serve(async (req: Request) => {
 
     const paystackData = await paystackRes.json();
 
-    // 3. Check Paystack response
+    // 6. Check Paystack response status
     if (!paystackData.status || paystackData.data?.status !== "success") {
       console.warn("Paystack verification failed:", paystackData);
       return new Response(
@@ -77,43 +106,36 @@ serve(async (req: Request) => {
     }
 
     const txAmount = paystackData.data.amount; // in kobo
-    const expectedAmount = 70000; // ₦700 × 100 kobo
 
-    // 4. Validate amount matches (prevents underpayment attacks)
-    if (txAmount < expectedAmount) {
-      console.warn(`Amount mismatch: got ${txAmount} kobo, expected ${expectedAmount} kobo`);
+    // 7. Validate the paid amount matches the order's actual total (prevents underpayment attacks)
+    if (txAmount < expectedKobo) {
+      console.warn(`Amount mismatch: got ${txAmount} kobo, expected ${expectedKobo} kobo`);
       return new Response(
         JSON.stringify({
           verified: false,
-          error: `Amount paid (₦${txAmount / 100}) does not match delivery fee (₦700)`,
+          error: `Amount paid (₦${txAmount / 100}) does not match order total (₦${expectedNaira})`,
         }),
         { status: 200, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } }
       );
     }
 
-    // 5. Update order status in Supabase using service role (bypasses RLS)
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
-
+    // 8. Update order status in Supabase
     const { error: dbError } = await supabase
       .from("orders")
       .update({
         status: "paid",
-        paystack_ref: reference,          // store the reference for your records
+        paystack_ref: reference,
       })
       .eq("id", order_id)
-      .eq("status", "pending");           // only update if still pending (idempotency guard)
+      .eq("status", "pending"); // idempotency guard — only update if still pending
 
     if (dbError) {
       console.error("DB update error:", dbError);
-      // Don't fail here — payment was real, just log it. Admin can fix manually.
-      // Still return verified:true so the customer isn't stuck.
+      // Payment was real — don't fail the customer. Log for manual fix.
       console.warn("Payment verified but DB update failed. Manual fix needed for order:", order_id);
     }
 
-    // 6. Return success
+    // 9. Return success
     return new Response(
       JSON.stringify({
         verified: true,
