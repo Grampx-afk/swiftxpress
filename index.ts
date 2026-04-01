@@ -65,10 +65,25 @@ serve(async (req: Request) => {
 
     // 4. Parse the expected amount from the fee field (e.g. "₦1400" → 1400)
     // The fee field stores values like "₦700", "₦1400", "Via WhatsApp", etc.
-    const feeStr = order.fee ?? "₦700";
+    const feeStr = order.fee;
+    if (!feeStr) {
+      console.error("Order fee is missing for order:", order_id);
+      return new Response(JSON.stringify({ error: "Order fee is not set" }), {
+        status: 400,
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
+
     const parsedFee = parseInt(feeStr.replace(/[^0-9]/g, ""), 10);
-    // Fall back to 700 if parsing fails (e.g. "Via WhatsApp" orders shouldn't reach here)
-    const expectedNaira = isNaN(parsedFee) || parsedFee <= 0 ? 700 : parsedFee;
+    if (isNaN(parsedFee) || parsedFee <= 0) {
+      console.error("Invalid fee amount for order:", order_id, "Fee:", feeStr);
+      return new Response(JSON.stringify({ error: "Order fee is invalid or not a fixed amount" }), {
+        status: 400,
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
+
+    const expectedNaira = parsedFee;
     const expectedKobo = expectedNaira * 100;
 
     // 5. Verify with Paystack API

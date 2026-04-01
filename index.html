@@ -2307,7 +2307,7 @@
           <div class="type-grid">
             <div class="type-opt selected" id="opt-inside" onclick="selectType('inside')">
               <div class="type-name">Inside Campus</div>
-              <div class="type-fee" id="txt-inside-fee">Fixed fee — ₦700</div>
+              <div class="type-fee" id="txt-inside-fee">Fixed fee — ₦...</div>
             </div>
             <div class="type-opt" id="opt-outside" onclick="selectType('outside')">
               <div class="type-name">Outside Campus</div>
@@ -2406,7 +2406,7 @@
               <div class="sum-key">Delivery Fee</div>
             </div>
             <div>
-              <div class="sum-val" id="sum-delivery-fee">₦700</div>
+              <div class="sum-val" id="sum-delivery-fee">₦...</div>
             </div>
           </div>
           <div class="sum-row">
@@ -2414,7 +2414,7 @@
               <div class="sum-key">Total Amount</div>
             </div>
             <div id="sum-fee-wrap">
-              <div class="sum-val big" id="sum-fee">₦700</div>
+              <div class="sum-val big" id="sum-fee">₦...</div>
             </div>
           </div>
         </div>
@@ -2464,7 +2464,7 @@
         <div class="pay-body">
           <div class="pay-notice" id="pay-notice-inside">
             <div class="pn-label">Amount to Pay</div>
-            <div class="pn-amt" id="pay-amount">₦700</div>
+            <div class="pn-amt" id="pay-amount">₦...</div>
             <div class="pn-sub">Delivery fee (inside campus)</div>
           </div>
           <div
@@ -2479,7 +2479,7 @@
           </div>
         </div>
         <div class="pay-footer">
-          <button class="btn-green" id="btn-pay-now" onclick="launchPaystack()"> PAY ₦700 SECURELY</button>
+          <button class="btn-green" id="btn-pay-now" onclick="launchPaystack()"> PAY SECURELY</button>
           <div id="pay-verifying" style="display:none;text-align:center;padding:12px;font-size:13px;color:var(--gray)">
             <span
               style="display:inline-block;width:14px;height:14px;border:2px solid var(--gray);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle"></span>
@@ -2565,7 +2565,7 @@
           </div>
           <div style="display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border)">
             <span style="font-size:12px;color:var(--gray)">Amount Paid</span>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--green)" id="rcpt-amount">₦700</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--green)" id="rcpt-amount">₦...</span>
           </div>
           <div style="display:flex;justify-content:space-between;">
             <span style="font-size:12px;color:var(--gray)">Date & Time</span>
@@ -2630,7 +2630,7 @@
           </div>
           <div style="display:flex;justify-content:space-between;">
             <span style="font-size:12px;color:var(--gray)">Amount</span>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--red)" id="fail-amount">₦700</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--red)" id="fail-amount">₦...</span>
           </div>
           <div style="display:flex;justify-content:space-between;">
             <span style="font-size:12px;color:var(--gray)">Reason</span>
@@ -2688,7 +2688,7 @@
     let orders = [];
     let currentOrder = {};
     const gSettings = JSON.parse(localStorage.getItem('sxSettings') || '{}');
-    let INSIDE_FEE = gSettings['s-fee'] ? parseInt(gSettings['s-fee']) : 700;
+    let INSIDE_FEE = gSettings['s-fee'] ? parseInt(gSettings['s-fee']) : null;
     let deliveryType = 'inside';
     let orderCategory = 'food';
     let foodItemsTotal = 0;

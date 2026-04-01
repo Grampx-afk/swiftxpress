@@ -524,7 +524,7 @@ tr:hover td{background:rgba(255,255,255,.025)}
             </div>
             <div style="margin-top:14px">
               <label style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:4px">Inside Campus Fee (₦)</label>
-              <input class="sfield" id="s-fee" type="number" placeholder="700"/>
+              <input class="sfield" id="s-fee" type="number" placeholder="e.g. 700"/>
             </div>
             <button class="save-btn" onclick="saveSettings()">SAVE CHANGES</button>
           </div>
@@ -646,14 +646,14 @@ tr:hover td{background:rgba(255,255,255,.025)}
       <div class="modal-row" style="margin-top:14px">
         <div class="modal-field">
           <label class="mf-label">Delivery Type</label>
-          <select id="c-type" class="sfield" style="margin-top:6px" onchange="document.getElementById('c-fee').value=this.value==='inside'?'₦700':'TBD'">
+          <select id="c-type" class="sfield" style="margin-top:6px" onchange="document.getElementById('c-fee').value=this.value==='inside'?'₦'+(settings['s-fee']||'700'):'TBD'">
             <option value="inside">Inside Campus</option>
             <option value="outside">Outside Campus</option>
           </select>
         </div>
         <div class="modal-field">
           <label class="mf-label">Fee</label>
-          <input id="c-fee" type="text" class="sfield" value="₦700" style="margin-top:6px;color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:18px"/>
+          <input id="c-fee" type="text" class="sfield" value="₦..." style="margin-top:6px;color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:18px"/>
         </div>
       </div>
       <div class="modal-row" style="margin-top:14px">
