@@ -1800,6 +1800,105 @@
     }
 
 
+    /* TRACK PAGE */
+    #track { background: var(--black) }
+    .track-outer { max-width: 520px; margin: 0 auto; padding: 32px 20px }
+    .track-search-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 28px 24px; margin-bottom: 20px;
+      animation: scaleIn .4s cubic-bezier(.34,1.1,.64,1) both
+    }
+    .track-search-card h3 { font-size: 26px; margin-bottom: 6px }
+    .track-search-card p { font-size: 13px; color: var(--gray); margin-bottom: 20px }
+    .track-input-row { display: flex; gap: 10px }
+    .track-input-row input {
+      flex: 1; background: #0d0d0d; border: 1px solid var(--border2);
+      border-radius: 6px; padding: 11px 13px; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; color: var(--white); outline: none; transition: border .15s
+    }
+    .track-input-row input:focus { border-color: var(--red) }
+    .track-input-row input::placeholder { color: var(--gray2) }
+    .btn-track {
+      background: var(--red); color: #fff; border: none;
+      font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px;
+      padding: 11px 22px; border-radius: 6px; cursor: pointer;
+      transition: all .2s cubic-bezier(.34,1.3,.64,1); white-space: nowrap
+    }
+    .btn-track:hover { background: var(--red-dark); transform: translateY(-2px) }
+    .track-err { font-size: 12px; color: #ff6b6b; margin-top: 8px; display: none }
+    .track-result-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; display: none;
+      animation: revealUp .4s cubic-bezier(.22,1,.36,1) both
+    }
+    .track-result-card.visible { display: block }
+    .track-result-top {
+      background: var(--surface); padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between
+    }
+    .track-result-top h3 { font-size: 22px; margin: 0 }
+    .track-status-badge {
+      font-family: 'Rajdhani', sans-serif; font-weight: 700;
+      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 20px; border: 1px solid
+    }
+    .track-status-badge.pending { color: var(--amber); background: var(--amber-dim); border-color: rgba(245,158,11,.3) }
+    .track-status-badge.paid { color: var(--green); background: var(--green-dim); border-color: var(--green-border) }
+    .track-status-badge.assigned { color: var(--blue); background: var(--blue-dim); border-color: var(--blue-border) }
+    .track-status-badge.delivered { color: var(--purple); background: var(--purple-dim); border-color: var(--purple-border) }
+    .track-timeline {
+      padding: 22px 22px 8px; display: flex; flex-direction: column; gap: 0
+    }
+    .track-step {
+      display: flex; gap: 14px; align-items: flex-start; position: relative
+    }
+    .track-step:not(:last-child)::after {
+      content: ''; position: absolute; left: 11px; top: 26px;
+      width: 2px; height: calc(100% - 6px); background: var(--border2)
+    }
+    .track-step.done:not(:last-child)::after { background: var(--green) }
+    .track-step.active-step:not(:last-child)::after { background: var(--border2) }
+    .track-dot-wrap { flex-shrink: 0; width: 24px; display: flex; justify-content: center; padding-top: 2px }
+    .track-dot {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid var(--border2); background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--gray); font-weight: 700; flex-shrink: 0
+    }
+    .track-dot.done { background: var(--green); border-color: var(--green); color: #000; font-size: 13px }
+    .track-dot.active-dot {
+      background: var(--red); border-color: var(--red); color: #fff;
+      animation: glowPulse 2s ease-in-out infinite
+    }
+    .track-step-info { padding-bottom: 22px; flex: 1 }
+    .track-step-name {
+      font-family: 'Rajdhani', sans-serif; font-weight: 700;
+      font-size: 13px; letter-spacing: .5px; text-transform: uppercase;
+      color: var(--gray); margin-bottom: 2px
+    }
+    .track-step-name.done { color: var(--green) }
+    .track-step-name.active-step { color: var(--white) }
+    .track-step-desc { font-size: 12px; color: var(--gray2); line-height: 1.5 }
+    .track-step-time { font-size: 11px; color: var(--gray2); margin-top: 3px }
+    .track-details { padding: 0 22px 18px; display: flex; flex-direction: column; gap: 8px }
+    .track-detail-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 10px 0; border-bottom: 1px solid var(--border)
+    }
+    .track-detail-row:last-child { border-bottom: none }
+    .track-detail-key { font-size: 11px; color: var(--gray); font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spacing: 1px; text-transform: uppercase }
+    .track-detail-val { font-size: 13px; color: var(--white); text-align: right; max-width: 60%; line-height: 1.4 }
+    .track-footer {
+      padding: 16px 22px; background: var(--surface);
+      border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px
+    }
+    .track-refresh {
+      font-size: 11px; color: var(--gray); text-align: center;
+      font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spacing: .5px
+    }
+    .track-refresh span { color: var(--green); animation: blink 1.5s infinite }
+
     /* Nav WA button responsive text */
     .nav-wa-icon {
       display: none
@@ -1931,10 +2030,9 @@
       <div class="sub">LAUTECH Fast Delivery</div>
     </div>
     <div class="nav-right">
-      <button class="nav-wa" onclick="openWA()"><span class="nav-wa-text">WhatsApp</span><span
-          class="nav-wa-icon">WA</span></button>
+      <button class="nav-wa" onclick="openWA()"><span class="nav-wa-text">WhatsApp</span><span class="nav-wa-icon">WA</span></button>
+      <button class="nav-wa" onclick="showTrackPage()" style="color:var(--amber);border-color:rgba(245,158,11,.3)"><span class="nav-wa-text">Track Order</span><span class="nav-wa-icon">📦</span></button>
       <button class="nav-order" onclick="startOrder()">Place Order</button>
-
     </div>
   </nav>
 
@@ -2382,6 +2480,9 @@
       </div>
 
       <div class="confirm-actions">
+        <button class="btn-green" id="btn-track-my-order" onclick=""
+          style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;padding:14px;border-radius:6px;border:none;cursor:pointer;width:100%;background:var(--red);color:#fff">
+          📦 TRACK MY ORDER</button>
         <button class="btn-green" onclick="openWA()"
           style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;padding:14px;border-radius:6px;border:none;cursor:pointer;width:100%;background:var(--green);color:#000">
           CHAT US ON WHATSAPP</button>
@@ -2801,7 +2902,8 @@
           // ✅ Payment confirmed — show success receipt
           currentOrder.status = 'paid';
           showSuccessReceipt(reference);
-          const msg = `Hi SwiftXpress! My payment is confirmed for Order #${currentOrder.order_number || fmtId(currentOrder.id)}.\n\nPaystack Ref: ${reference}\nName: ${currentOrder.name}\nPhone: ${currentOrder.phone}\nItem: ${currentOrder.item}\nPickup: ${currentOrder.pickup}\nDropoff: ${currentOrder.dropoff}\n\nThank you!`;
+          const trackingUrl = `${window.location.origin}${window.location.pathname}?track=${currentOrder.order_number || fmtId(currentOrder.id)}`;
+          const msg = `Hi SwiftXpress! My payment is confirmed for Order #${currentOrder.order_number || fmtId(currentOrder.id)}.\n\nPaystack Ref: ${reference}\nName: ${currentOrder.name}\nPhone: ${currentOrder.phone}\nItem: ${currentOrder.item}\nPickup: ${currentOrder.pickup}\nDropoff: ${currentOrder.dropoff}\n\n📦 Track my order live: ${trackingUrl}\n\nThank you!`;
           openWA(msg);
           startTracking(currentOrder.id);
         } else {
@@ -2842,6 +2944,11 @@
       document.getElementById('rcpt-dropoff').textContent = currentOrder.dropoff;
       document.getElementById('rcpt-amount').textContent = `₦${totalAmount}`;
       document.getElementById('rcpt-time').textContent = now;
+
+      // Wire up Track My Order button
+      const orderId = currentOrder.order_number || fmtId(currentOrder.id);
+      const trackBtn = document.getElementById('btn-track-my-order');
+      if (trackBtn) trackBtn.onclick = () => showTrackPage(orderId);
 
       showPage('confirm');
     }
@@ -2965,7 +3072,105 @@
 
 
 
-    //  LOAD ORDERS 
+    //  TRACKING PAGE
+    let trackPageInterval = null;
+
+    function showTrackPage(orderId) {
+      showPage('track');
+      if (orderId) {
+        document.getElementById('track-input').value = orderId;
+        lookupOrder();
+      }
+    }
+
+    async function lookupOrder() {
+      const raw = document.getElementById('track-input').value.trim();
+      const errEl = document.getElementById('track-err');
+      const resultCard = document.getElementById('track-result-card');
+      errEl.style.display = 'none';
+      resultCard.classList.remove('visible');
+
+      if (!raw) { errEl.style.display = 'block'; errEl.textContent = 'Please enter your Order ID.'; return; }
+      if (!_supaClient) { errEl.style.display = 'block'; errEl.textContent = 'Database not available. Please try again.'; return; }
+
+      // Search by order_number (4-digit) or numeric id
+      const { data, error } = await _supaClient
+        .from('orders')
+        .select('*')
+        .or(`order_number.eq.${raw},id.eq.${isNaN(raw) ? -1 : parseInt(raw)}`)
+        .limit(1)
+        .single();
+
+      if (error || !data) {
+        errEl.style.display = 'block';
+        errEl.textContent = 'Order not found. Check your Order ID and try again.';
+        return;
+      }
+
+      renderTrackResult(data);
+
+      // Start auto-refresh
+      if (trackPageInterval) clearInterval(trackPageInterval);
+      trackPageInterval = setInterval(async () => {
+        const { data: fresh } = await _supaClient.from('orders').select('*').eq('id', data.id).single();
+        if (fresh) renderTrackResult(fresh);
+        if (fresh && fresh.status === 'delivered') clearInterval(trackPageInterval);
+      }, 5000);
+    }
+
+    function renderTrackResult(order) {
+      const resultCard = document.getElementById('track-result-card');
+      const statusMap = { pending: 0, paid: 1, assigned: 2, delivered: 3 };
+      const idx = statusMap[order.status] ?? 0;
+
+      // Header
+      document.getElementById('tr-order-id').textContent = order.order_number || fmtId(order.id);
+
+      // Badge
+      const badge = document.getElementById('tr-badge');
+      const badgeLabels = { pending: 'Awaiting Payment', paid: 'Paid — Preparing', assigned: 'Rider Dispatched', delivered: 'Delivered ✓' };
+      badge.textContent = badgeLabels[order.status] || order.status;
+      badge.className = 'track-status-badge ' + (order.status || 'pending');
+
+      // Timeline steps
+      const steps = ['received', 'paid', 'assigned', 'delivered'];
+      steps.forEach((s, i) => {
+        const dot = document.getElementById(`trdot-${s}`);
+        const label = document.getElementById(`trlabel-${s}`);
+        const step = document.getElementById(`trstep-${s}`);
+        dot.className = 'track-dot';
+        label.className = 'track-step-name';
+        step.className = 'track-step';
+        if (i < idx) {
+          dot.classList.add('done'); dot.textContent = '✓';
+          label.classList.add('done'); step.classList.add('done');
+        } else if (i === idx) {
+          dot.classList.add('active-dot'); dot.textContent = i + 1;
+          label.classList.add('active-step'); step.classList.add('active-step');
+        } else {
+          dot.textContent = i + 1;
+        }
+      });
+
+      // Details
+      document.getElementById('tr-name').textContent = order.name || '—';
+      document.getElementById('tr-item').textContent = order.item || '—';
+      document.getElementById('tr-pickup').textContent = order.pickup || '—';
+      document.getElementById('tr-dropoff').textContent = order.dropoff || '—';
+      document.getElementById('tr-fee').textContent = order.fee || '—';
+
+      resultCard.classList.add('visible');
+    }
+
+    // Check URL for ?track=XXXX on load
+    (function checkTrackParam() {
+      const params = new URLSearchParams(window.location.search);
+      const trackId = params.get('track');
+      if (trackId) {
+        // Wait for supabase to init then open track page
+        supabaseInit.then(() => showTrackPage(trackId));
+      }
+    })(); 
     loadOrders();
 
     //  SCROLL REVEAL 
@@ -3020,6 +3225,103 @@
       const e7 = document.getElementById('fail-amount'); if (e7) e7.textContent = `₦${INSIDE_FEE}`;
     });
   </script>
+  <!--  TRACK ORDER PAGE  -->
+  <div id="track" class="page">
+    <div class="page-header">
+      <h2>TRACK YOUR ORDER</h2>
+      <p>Enter your Order ID to get live delivery updates</p>
+    </div>
+    <div class="track-outer">
+
+      <!-- Search Card -->
+      <div class="track-search-card">
+        <h3>FIND ORDER</h3>
+        <p>Use the Order ID from your WhatsApp confirmation message</p>
+        <div class="track-input-row">
+          <input id="track-input" type="text" placeholder="e.g. 4722" maxlength="10"
+            onkeydown="if(event.key==='Enter') lookupOrder()" />
+          <button class="btn-track" onclick="lookupOrder()">TRACK</button>
+        </div>
+        <div class="err track-err" id="track-err">Order not found. Check your Order ID and try again.</div>
+      </div>
+
+      <!-- Result Card (hidden until search) -->
+      <div class="track-result-card" id="track-result-card">
+        <div class="track-result-top">
+          <h3>ORDER #<span id="tr-order-id">—</span></h3>
+          <div class="track-status-badge" id="tr-badge">Pending</div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="track-timeline">
+          <div class="track-step" id="trstep-received">
+            <div class="track-dot-wrap"><div class="track-dot" id="trdot-received">1</div></div>
+            <div class="track-step-info">
+              <div class="track-step-name" id="trlabel-received">Order Received</div>
+              <div class="track-step-desc">Your order has been placed and saved in our system</div>
+            </div>
+          </div>
+          <div class="track-step" id="trstep-paid">
+            <div class="track-dot-wrap"><div class="track-dot" id="trdot-paid">2</div></div>
+            <div class="track-step-info">
+              <div class="track-step-name" id="trlabel-paid">Payment Confirmed</div>
+              <div class="track-step-desc">We've received and verified your payment</div>
+            </div>
+          </div>
+          <div class="track-step" id="trstep-assigned">
+            <div class="track-dot-wrap"><div class="track-dot" id="trdot-assigned">3</div></div>
+            <div class="track-step-info">
+              <div class="track-step-name" id="trlabel-assigned">Rider Assigned</div>
+              <div class="track-step-desc">A rider has been dispatched to pick up your order</div>
+            </div>
+          </div>
+          <div class="track-step" id="trstep-delivered">
+            <div class="track-dot-wrap"><div class="track-dot" id="trdot-delivered">4</div></div>
+            <div class="track-step-info">
+              <div class="track-step-name" id="trlabel-delivered">Delivered</div>
+              <div class="track-step-desc">Your order has been delivered to your location</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Details -->
+        <div class="track-details">
+          <div class="track-detail-row">
+            <span class="track-detail-key">Name</span>
+            <span class="track-detail-val" id="tr-name">—</span>
+          </div>
+          <div class="track-detail-row">
+            <span class="track-detail-key">Order</span>
+            <span class="track-detail-val" id="tr-item">—</span>
+          </div>
+          <div class="track-detail-row">
+            <span class="track-detail-key">Pickup</span>
+            <span class="track-detail-val" id="tr-pickup">—</span>
+          </div>
+          <div class="track-detail-row">
+            <span class="track-detail-key">Dropoff</span>
+            <span class="track-detail-val" id="tr-dropoff">—</span>
+          </div>
+          <div class="track-detail-row">
+            <span class="track-detail-key">Amount</span>
+            <span class="track-detail-val" id="tr-fee">—</span>
+          </div>
+        </div>
+
+        <div class="track-footer">
+          <button class="btn-full" onclick="openWA()" style="background:var(--green);color:#000;font-size:18px;margin-top:0">
+            CHAT US ON WHATSAPP
+          </button>
+          <button class="btn-outline-red" onclick="goHome()" style="background:transparent;border:1px solid var(--border2);color:var(--gray);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;padding:10px;border-radius:6px;cursor:pointer;text-transform:uppercase;width:100%;transition:.15s">
+            ← BACK TO HOME
+          </button>
+          <div class="track-refresh">Auto-refreshing <span>●</span> every 5 seconds</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- FLOATING WHATSAPP BUTTON -->
   <div class="wa-float" onclick="openWA()">
     <div class="wa-float-tooltip">Chat with us on WhatsApp</div>
