@@ -38,3 +38,35 @@ create policy "Allow public read and update"
 
 -- 6. If your orders table already exists, just add the paystack_ref column:
 -- alter table public.orders add column if not exists paystack_ref text;
+
+-- ─────────────────────────────────────────────
+-- 7. Create the 'settings' table
+--    Stores admin-configurable values (delivery fee, WA number, etc.)
+--    so ALL browsers read the same live values.
+-- ─────────────────────────────────────────────
+create table if not exists public.settings (
+  key text primary key,   -- e.g. 'delivery_fee', 'wa_number'
+  value text not null     -- e.g. '500', '2349023413227'
+);
+
+-- Seed default values
+insert into public.settings (key, value)
+values
+  ('delivery_fee', '700'),
+  ('wa_number',    '2349023413227')
+on conflict (key) do nothing;
+
+-- RLS: allow public read; only service role (admin) can write
+alter table public.settings enable row level security;
+
+create policy "Allow public read settings"
+  on public.settings for select
+  using (true);
+
+create policy "Allow public update settings"
+  on public.settings for update
+  using (true);
+
+create policy "Allow public insert settings"
+  on public.settings for insert
+  with check (true);

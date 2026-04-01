@@ -1142,13 +1142,23 @@ function saveOrders() {
 }
 
 //  SETTINGS 
-function saveSettings() {
+async function saveSettings() {
   ['s-wa','s-acctname','s-acctnum','s-fee'].forEach(id => {
     settings[id] = document.getElementById(id).value;
   });
   localStorage.setItem('sxSettings', JSON.stringify(settings));
-  // Update WA number live so buttons work immediately without reload
   if (settings['s-wa']) window.WA_NUMBER = settings['s-wa'];
+
+  // Also persist delivery_fee and wa_number to Supabase so customers always get the live value
+  if (_supaClient) {
+    const upserts = [];
+    if (settings['s-fee']) upserts.push({ key: 'delivery_fee', value: String(parseInt(settings['s-fee']) || 700) });
+    if (settings['s-wa'])  upserts.push({ key: 'wa_number',    value: settings['s-wa'] });
+    if (upserts.length) {
+      const { error } = await _supaClient.from('settings').upsert(upserts, { onConflict: 'key' });
+      if (error) { showToast('Settings saved locally (DB sync failed)', 'error'); return; }
+    }
+  }
   showToast(' Settings saved', 'success');
 }
 
