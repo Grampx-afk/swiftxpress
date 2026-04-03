@@ -2408,9 +2408,22 @@
           </form>
           <div style="margin-top:24px; border-top:1px solid var(--border); padding-top:20px;">
              <div class="p-title">Default Address</div>
-             <p style="font-size:11px; color:var(--gray); margin-bottom:8px;">We'll pre-fill this for your next order</p>
-             <textarea id="prof-address" style="width:100%; background:var(--surface); border:1px solid var(--border2); border-radius:6px; color:var(--white); padding:10px; font-size:12px; resize:none;" rows="3" placeholder="e.g. Moremi Hall, Block B, Room 102"></textarea>
-             <button onclick="saveProfileAddress()" class="btn-red" style="width:100%; font-size:12px; padding:8px; margin-top:8px; opacity:0.8;">UPDATE ADDRESS</button>
+             
+             <!-- VIEW MODE -->
+             <div id="prof-addr-view">
+               <div id="prof-addr-text" class="address-box">No address saved yet.</div>
+               <button onclick="toggleAddrEdit(true)" class="btn-logout" style="margin-top:8px; border-color:var(--red-border); color:var(--red);">✏️ EDIT ADDRESS</button>
+             </div>
+
+             <!-- EDIT MODE -->
+             <div id="prof-addr-edit" style="display:none;">
+               <p style="font-size:11px; color:var(--gray); margin-bottom:8px;">We'll pre-fill this for your next order</p>
+               <textarea id="prof-address-input" style="width:100%; background:var(--surface); border:1px solid var(--border2); border-radius:6px; color:var(--white); padding:10px; font-size:12px; resize:none;" rows="3" placeholder="e.g. Moremi Hall, Block B, Room 102"></textarea>
+               <div style="display:flex; gap:8px;">
+                 <button onclick="saveProfileAddress()" class="btn-red" style="flex:1; font-size:12px; padding:8px; margin-top:8px;">SAVE</button>
+                 <button onclick="toggleAddrEdit(false)" class="nav-wa" style="flex:1; font-size:10px; margin-top:8px;">CANCEL</button>
+               </div>
+             </div>
           </div>
           <button class="btn-logout" onclick="handleLogout()">SIGN OUT OF ACCOUNT</button>
         </div>
@@ -2588,6 +2601,7 @@
           <div class="field">
             <label>Delivery Location</label>
             <div id="addr-selection-wrap" style="display:none; margin-bottom:8px;">
+               <p style="font-size:11px; color:var(--gray); margin-bottom:10px;">Select your delivery option:</p>
                <div class="addr-picker">
                   <div class="addr-opt active" id="addr-opt-home" onclick="useSavedAddr()">SAME AS PROFILE</div>
                   <div class="addr-opt" id="addr-opt-change" onclick="changeAddr()">CHANGE ADDRESS</div>
@@ -3116,8 +3130,18 @@
       document.getElementById('prof-initials').textContent = (_profile.full_name || 'U').charAt(0).toUpperCase();
       document.getElementById('prof-edit-name').value = _profile.full_name || '';
       document.getElementById('prof-edit-phone').value = _profile.phone || '';
-      document.getElementById('prof-address').value = _profile.saved_address || '';
+      
+      const addrBox = document.getElementById('prof-addr-text');
+      if (addrBox) addrBox.textContent = _profile.saved_address || 'No address saved yet.';
+      const addrInput = document.getElementById('prof-address-input');
+      if (addrInput) addrInput.value = _profile.saved_address || '';
+      
       fetchUserHistory();
+    }
+
+    function toggleAddrEdit(isEditing) {
+      document.getElementById('prof-addr-view').style.display = isEditing ? 'none' : 'block';
+      document.getElementById('prof-addr-edit').style.display = isEditing ? 'block' : 'none';
     }
 
     async function updateProfile(e) {
@@ -3136,10 +3160,16 @@
     }
 
     async function saveProfileAddress() {
-      const addr = document.getElementById('prof-address').value;
-      await _supaClient.from('profiles').update({ saved_address: addr }).eq('id', _user.id);
-      _profile.saved_address = addr;
-      alert('Address saved to your profile!');
+      const addr = document.getElementById('prof-address-input').value;
+      const btn = document.querySelector('#prof-addr-edit .btn-red');
+      btn.textContent = 'SAVING...';
+      const { error } = await _supaClient.from('profiles').update({ saved_address: addr }).eq('id', _user.id);
+      if (!error) {
+        _profile.saved_address = addr;
+        renderProfile();
+        toggleAddrEdit(false);
+      }
+      btn.textContent = 'SAVE';
     }
 
     async function fetchUserHistory() {
