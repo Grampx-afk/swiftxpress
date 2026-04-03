@@ -2313,7 +2313,6 @@
     </div>
     <div class="nav-right">
       <button class="nav-wa" onclick="openWA()"><span class="nav-wa-text">WhatsApp</span><span class="nav-wa-icon">WA</span></button>
-      <button id="btn-nav-track" class="nav-wa" onclick="showTrackPage()" style="color:var(--amber);border-color:rgba(245,158,11,.3)"><span class="nav-wa-text">Track Order</span><span class="nav-wa-icon">📦</span></button>
       <button id="btn-nav-login" class="nav-wa" onclick="showPage('login')" style="color:var(--white);border-color:var(--border2);"><span class="nav-wa-text">Login</span><span class="nav-wa-icon">👤</span></button>
       <button id="btn-nav-profile" class="nav-wa" onclick="showPage('profile')" style="color:var(--white);border-color:var(--border2); display:none;"><span class="nav-wa-text">Profile</span><span class="nav-wa-icon">🏠</span></button>
       <button class="nav-order" onclick="startOrder()">Place Order</button>
@@ -3182,6 +3181,11 @@
     }
     function goHome() { showPage('home'); }
     function startOrder() {
+      if (!_user) {
+        alert('Kindly sign in to your SwiftXpress account to place an order.');
+        showPage('login');
+        return;
+      }
       // Show T&C modal before proceeding to order form
       document.getElementById('tnc-modal').classList.add('open');
     }
