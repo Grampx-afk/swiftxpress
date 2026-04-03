@@ -2315,7 +2315,7 @@
       <button class="nav-wa" onclick="openWA()"><span class="nav-wa-text">WhatsApp</span><span class="nav-wa-icon">WA</span></button>
       <button id="btn-nav-login" class="nav-wa" onclick="showPage('login')" style="color:var(--white);border-color:var(--border2);"><span class="nav-wa-text">Login</span><span class="nav-wa-icon">👤</span></button>
       <button id="btn-nav-profile" class="nav-wa" onclick="showPage('profile')" style="color:var(--white);border-color:var(--border2); display:none;"><span class="nav-wa-text">Profile</span><span class="nav-wa-icon">🏠</span></button>
-      <button class="nav-order" onclick="startOrder()">Place Order</button>
+      <button id="btn-nav-order" class="nav-order" onclick="startOrder()" style="display:none;">Place Order</button>
     </div>
   </nav>
 
@@ -2444,7 +2444,7 @@
         <span class="tag"> Campus-wide</span>
       </div>
       <div class="hero-cta">
-        <button class="btn-red" onclick="startOrder()"> Place Order</button>
+        <button id="btn-hero-order" class="btn-red" onclick="startOrder()" style="display:none;"> Place Order</button>
         <button class="btn-wa" onclick="openWA()"> Chat on WhatsApp</button>
       </div>
     </div>
@@ -2988,11 +2988,16 @@
     function updateAuthUI() {
       const btnLogin = document.getElementById('btn-nav-login');
       const btnProf = document.getElementById('btn-nav-profile');
+      const btnNavOrder = document.getElementById('btn-nav-order');
+      const btnHeroOrder = document.getElementById('btn-hero-order');
+
       if (_user) {
         btnLogin.style.display = 'none';
         btnProf.style.display = 'flex';
+        if (btnNavOrder) btnNavOrder.style.display = 'block';
+        if (btnHeroOrder) btnHeroOrder.style.display = 'block';
         // Pre-fill order form if empty
-        if (!document.getElementById('f-name').value) {
+        if (document.getElementById('f-name') && !document.getElementById('f-name').value) {
             fetchProfile().then(p => {
                 if (p) {
                    document.getElementById('f-name').value = p.full_name || '';
@@ -3007,7 +3012,11 @@
       } else {
         btnLogin.style.display = 'flex';
         btnProf.style.display = 'none';
-        document.getElementById('addr-selection-wrap').style.display = 'none';
+        if (btnNavOrder) btnNavOrder.style.display = 'none';
+        if (btnHeroOrder) btnHeroOrder.style.display = 'none';
+        if (document.getElementById('addr-selection-wrap')) {
+            document.getElementById('addr-selection-wrap').style.display = 'none';
+        }
       }
     }
 
