@@ -70,3 +70,42 @@ create policy "Allow public update settings"
 create policy "Allow public insert settings"
   on public.settings for insert
   with check (true);
+
+-- ─────────────────────────────────────────────
+-- 8. USER PROFILES & AUTHENTICATION (NEW)
+-- ─────────────────────────────────────────────
+
+-- Profiles Table linked to Auth.Users
+create table if not exists public.profiles (
+  id uuid references auth.users on delete cascade primary key,
+  full_name text,
+  phone text,
+  saved_address text, -- Can store multiple addresses (JSONB) or a simple text
+  created_at timestamptz default now()
+);
+
+-- Register 'profiles' in RLS
+alter table public.profiles enable row level security;
+
+create policy "Users can view their own profile"
+  on public.profiles for select
+  using (auth.uid() = id);
+
+create policy "Users can update their own profile"
+  on public.profiles for update
+  using (auth.uid() = id);
+
+create policy "Users can insert their own profile"
+  on public.profiles for insert
+  with check (auth.uid() = id);
+
+-- 9. Add 'user_id' to existing 'orders' table
+alter table public.orders 
+add column if not exists user_id uuid references auth.users(id);
+
+-- 10. Refined RLS for Order History
+-- Allow users to view their own orders; guests can view orders via ref
+create policy "Users can view their own order history"
+  on public.orders for select
+  using (auth.uid() = user_id or user_id is null);
+
