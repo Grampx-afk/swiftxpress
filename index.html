@@ -1850,7 +1850,8 @@
 
       .nav-order {
         font-size: 11px;
-        padding: 6px 12px
+        padding: 6px 12px;
+        display: none;
       }
 
       /* Hero */
@@ -2315,7 +2316,7 @@
       <button class="nav-wa" onclick="openWA()"><span class="nav-wa-text">WhatsApp</span><span class="nav-wa-icon">WA</span></button>
       <button id="btn-nav-login" class="nav-wa" onclick="showPage('login')" style="color:var(--white);border-color:var(--border2);"><span class="nav-wa-text">Login</span><span class="nav-wa-icon">👤</span></button>
       <button id="btn-nav-profile" class="nav-wa" onclick="showPage('profile')" style="color:var(--white);border-color:var(--border2); display:none;"><span class="nav-wa-text">Profile</span><span class="nav-wa-icon">🏠</span></button>
-      <button id="btn-nav-order" class="nav-order" onclick="startOrder()" style="display:none;">Place Order</button>
+      <button id="btn-nav-order" class="nav-order" onclick="startOrder()" style="display:none !important;">Place Order</button>
     </div>
   </nav>
 
@@ -2992,10 +2993,10 @@
       const btnHeroOrder = document.getElementById('btn-hero-order');
 
       if (_user) {
-        btnLogin.style.display = 'none';
-        btnProf.style.display = 'flex';
-        if (btnNavOrder) btnNavOrder.style.display = 'block';
-        if (btnHeroOrder) btnHeroOrder.style.display = 'block';
+        if (btnLogin) btnLogin.style.display = 'none';
+        if (btnProf) btnProf.style.display = 'flex';
+        if (btnNavOrder) btnNavOrder.style.setProperty('display', 'inline-block', 'important');
+        if (btnHeroOrder) btnHeroOrder.style.setProperty('display', 'inline-block', 'important');
         // Pre-fill order form if empty
         if (document.getElementById('f-name') && !document.getElementById('f-name').value) {
             fetchProfile().then(p => {
@@ -3010,10 +3011,10 @@
             });
         }
       } else {
-        btnLogin.style.display = 'flex';
-        btnProf.style.display = 'none';
-        if (btnNavOrder) btnNavOrder.style.display = 'none';
-        if (btnHeroOrder) btnHeroOrder.style.display = 'none';
+        if (btnLogin) btnLogin.style.display = 'flex';
+        if (btnProf) btnProf.style.display = 'none';
+        if (btnNavOrder) btnNavOrder.style.setProperty('display', 'none', 'important');
+        if (btnHeroOrder) btnHeroOrder.style.setProperty('display', 'none', 'important');
         if (document.getElementById('addr-selection-wrap')) {
             document.getElementById('addr-selection-wrap').style.display = 'none';
         }
