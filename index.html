@@ -3066,7 +3066,13 @@
       btn.disabled = true;
 
       try {
-        const { data, error } = await _supaClient.auth.signUp({ email, password: pass });
+        const { data, error } = await _supaClient.auth.signUp({ 
+          email, 
+          password: pass,
+          options: {
+            data: { full_name: name, phone: phone }
+          }
+        });
         
         if (error) {
           err.textContent = error.message;
@@ -3114,7 +3120,21 @@
 
     async function fetchProfile() {
       if (!_user) return null;
-      const { data, error } = await _supaClient.from('profiles').select('*').eq('id', _user.id).single();
+      let { data, error } = await _supaClient.from('profiles').select('*').eq('id', _user.id).single();
+      
+      // If profile doesn't exist, try to create it from auth data
+      if (error && error.code === 'PGRST116') {
+         const { error: insError } = await _supaClient.from('profiles').insert([{ 
+            id: _user.id, 
+            full_name: _user.user_metadata?.full_name || 'User Account',
+            phone: _user.user_metadata?.phone || ''
+         }]);
+         if (!insError) {
+             const { data: newData } = await _supaClient.from('profiles').select('*').eq('id', _user.id).single();
+             data = newData;
+         }
+      }
+
       if (data) {
         _profile = data;
         renderProfile();
