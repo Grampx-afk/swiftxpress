@@ -2987,6 +2987,13 @@
           // Listen for Auth changes
           _supaClient.auth.onAuthStateChange((event, session) => {
             _user = session?.user || null;
+            if (!_user) {
+              _profile = null;
+              currentOrder = {};
+              document.getElementById('prof-name').textContent = 'User Account';
+              document.getElementById('prof-email').textContent = 'user@example.com';
+              document.getElementById('prof-initials').textContent = 'U';
+            }
             updateAuthUI();
             if (_user) fetchProfile();
           });
@@ -3120,6 +3127,7 @@
 
     async function fetchProfile() {
       if (!_user) return null;
+      _profile = null; // Clear old profile before fetching
       let { data, error } = await _supaClient.from('profiles').select('*').eq('id', _user.id).single();
       
       // If profile doesn't exist, try to create it from auth data
