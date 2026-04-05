@@ -3127,6 +3127,15 @@
 
     async function fetchProfile() {
       if (!_user) return null;
+      
+      // Verify user against backend to catch deleted accounts
+      const { data: activeUser, error: authErr } = await _supaClient.auth.getUser();
+      if (authErr || !activeUser?.user) {
+         await handleLogout();
+         alert('Your session has expired or your account is no longer valid. Please log in again.');
+         return null;
+      }
+
       _profile = null; // Clear old profile before fetching
       let { data, error } = await _supaClient.from('profiles').select('*').eq('id', _user.id).single();
       
