@@ -3494,7 +3494,9 @@
 
       const sid = currentOrder.order_number || fmtId(currentOrder.id);
 
-      if (deliveryType === 'inside') {
+      const hasNumericFee = currentOrder.fee && currentOrder.fee.match(/\d+/);
+
+      if (deliveryType === 'inside' || hasNumericFee) {
         const totalAmountStr = currentOrder.fee ? currentOrder.fee.replace(/[^0-9]/g, '') : `${INSIDE_FEE}`;
         const totalAmount = parseInt(totalAmountStr) || INSIDE_FEE;
         
@@ -3863,7 +3865,26 @@
       document.getElementById('tr-dropoff').textContent = order.dropoff || '—';
       document.getElementById('tr-fee').textContent = order.fee || '—';
 
+      const hasNumericFee = order.fee && order.fee.match(/\d+/);
+      const isPending = order.status === 'pending';
+      const trBtnPay = document.getElementById('tr-btn-pay');
+      if (trBtnPay) {
+        if (isPending && hasNumericFee) {
+          trBtnPay.style.display = '';
+          currentOrder = order;
+          deliveryType = order.type;
+        } else {
+          trBtnPay.style.display = 'none';
+        }
+      }
+
       resultCard.classList.add('visible');
+    }
+
+    function goToPaymentFromTrack() {
+      if (!currentOrder) return;
+      deliveryType = currentOrder.type;
+      goToPayment();
     }
 
     // Check URL for ?track=XXXX on load
@@ -4013,6 +4034,9 @@
         </div>
 
         <div class="track-footer">
+          <button id="tr-btn-pay" class="btn-full" onclick="goToPaymentFromTrack()" style="background:var(--red);color:#fff;font-size:18px;margin-top:0;display:none;margin-bottom:10px;">
+            PAYMENT READY - PAY NOW
+          </button>
           <button class="btn-full" onclick="openWA()" style="background:var(--green);color:#000;font-size:18px;margin-top:0">
             CHAT US ON WHATSAPP
           </button>
