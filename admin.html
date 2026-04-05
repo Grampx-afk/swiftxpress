@@ -604,6 +604,7 @@ tr:hover td{background:rgba(255,255,255,.025)}
         <option value="assigned">Assigned</option>
         <option value="delivered">Delivered</option>
       </select>
+      <button id="m-btn-set-price" style="background:var(--blue);border:1px solid var(--blue);color:#fff;display:none;padding:9px 12px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;cursor:pointer;border-radius:6px;text-transform:uppercase" onclick="promptCustomPrice()">SET PRICE</button>
       <button class="modal-wa" onclick="whatsappOrder()">WhatsApp</button>
       <button class="modal-save" onclick="saveModal()">SAVE</button>
       <button class="modal-delete" style="background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;padding:9px 15px;border-radius:6px;cursor:pointer;text-transform:uppercase;transition:.15s" onclick="deleteOrderNow()" onmouseover="this.style.background='rgba(255,107,107,.2)'" onmouseout="this.style.background='rgba(255,107,107,.1)'">Delete</button>
@@ -1063,10 +1064,25 @@ function openModal(id) {
   document.getElementById('m-pickup').textContent = o.pickup;
   document.getElementById('m-dropoff').textContent = o.dropoff;
   document.getElementById('m-type').textContent = o.type === 'inside' ? ' Inside Campus' : ' Outside Campus';
+  document.getElementById('m-btn-set-price').style.display = o.type === 'outside' ? 'inline-block' : 'none';
   document.getElementById('m-fee').value = o.fee;
   document.getElementById('m-time').textContent = o.time;
   document.getElementById('m-status').value = o.status;
   document.getElementById('modal-overlay').classList.add('open');
+}
+
+function promptCustomPrice() {
+  const custom = prompt('Enter the custom delivery price for this OUTSIDE Campus order (e.g., 600 or 1500):');
+  if (custom) {
+    const num = custom.replace(/[^\d]/g, '');
+    if (num) {
+      document.getElementById('m-fee').value = '₦' + num;
+      // Optional: draw attention to Save button
+      const saveBtn = document.querySelector('.modal-save');
+      saveBtn.style.animation = 'blink 1s ease 3';
+      showToast('Price set! Click SAVE to apply it.', 'success');
+    }
+  }
 }
 
 function closeModal() {
