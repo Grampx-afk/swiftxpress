@@ -3308,7 +3308,7 @@
     function openWA(msg) {
       const saved = JSON.parse(localStorage.getItem('sxSettings') || '{}');
       const num = (saved['s-wa'] || window.WA_NUMBER || '2349023413227').replace(/\D/g, '');
-      const text = encodeURIComponent(msg || 'Hi SwiftXpress! I just placed an order.');
+      const text = encodeURIComponent(msg || 'Hi SwiftXpress! I need some help or have a question.');
       window.open(`https://wa.me/${num}?text=${text}`, '_blank');
     }
 

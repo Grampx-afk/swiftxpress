@@ -1041,7 +1041,7 @@ function openWA(msg) {
   const saved = JSON.parse(localStorage.getItem('sxSettings') || '{}');
   const num = (saved['s-wa'] || window.WA_NUMBER || '').replace(/\D/g,'');
   if (!num) { showToast('Set your WhatsApp number in Settings first', 'error'); return; }
-  const text = encodeURIComponent(msg || 'Hi SwiftXpress!');
+  const text = encodeURIComponent(msg || 'Hi SwiftXpress! I need some help or have a question.');
   window.open(`https://wa.me/${num}?text=${text}`, '_blank');
 }
 
