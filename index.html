@@ -42,7 +42,12 @@
 
     html,
     body {
-      background: var(--black);
+      background-color: var(--black);
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-attachment: fixed;
       color: var(--white);
       font-family: 'DM Sans', sans-serif;
       min-height: 100vh
@@ -615,12 +620,35 @@
       background: var(--red-dark)
     }
 
-    /* AUTH & PROFILE PAGES */
-    .auth-container {
-      max-width: 400px;
-      margin: 60px auto;
-      padding: 0 20px;
+    /* AUTH MODALS & PROFILE */
+    .auth-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(8, 8, 8, 0.85);
+      backdrop-filter: blur(6px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeUp 0.3s ease;
     }
+    .auth-modal.active-modal {
+      display: flex;
+    }
+    .auth-container {
+      width: 100%;
+      max-width: 420px;
+      padding: 0 20px;
+      position: relative;
+    }
+    .btn-close-modal {
+      position: absolute;
+      top: -40px; right: 20px;
+      background: none; border: none;
+      color: var(--white); font-size: 24px; cursor: pointer;
+      opacity: 0.6; transition: 0.2s;
+    }
+    .btn-close-modal:hover { opacity: 1; transform: scale(1.1); color: var(--red); }
     .auth-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -796,7 +824,7 @@
 
     /*  HOMEPAGE  */
     #home {
-      background: var(--black)
+      background: transparent
     }
 
     .hero {
@@ -1057,9 +1085,42 @@
       line-height: 1.5
     }
 
+    /* FAQ SECTION */
+    .faq { max-width: 700px; margin: 0 auto; padding: 0 24px 80px; text-align: left; }
+    .faq .sec-title { text-align: center; }
+    .faq .sec-label { text-align: center; }
+    .faq-list { margin-top: 32px; display: flex; flex-direction: column; gap: 12px; }
+    .faq-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: .2s; }
+    .faq-item:hover { border-color: var(--red-border); }
+    .faq-item summary { padding: 18px 20px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+    .faq-item summary::after { content: "+"; color: var(--red); font-size: 20px; font-weight: 400; transition: transform .2s; }
+    .faq-item[open] summary::after { transform: rotate(45deg); }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-body { padding: 0 20px 20px; font-size: 13px; color: var(--gray); line-height: 1.6; }
+
+    /* REVIEWS SECTION */
+    .reviews { max-width: 100%; margin: 0 auto; padding: 40px 0 80px; text-align: center; overflow: hidden; }
+    .rev-slider-container { position: relative; margin-top: 40px; width: 100%; }
+    .rev-track { display: flex; align-items: center; justify-content: flex-start; gap: 24px; transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); width: max-content; }
+    .rev-card { flex-shrink: 0; width: 340px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px 24px; text-align: left; transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1); opacity: 0.4; transform: scale(0.85); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .rev-card.active { opacity: 1; transform: scale(1); border-color: var(--border2); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+    @media (max-width: 768px) { .rev-card { width: 280px; } }
+    .quote-icon { font-family: 'DM Sans', sans-serif; font-size: 64px; color: var(--border2); line-height: 0.5; margin-bottom: 24px; font-weight: 700; opacity: 0.5; }
+    .rev-text { font-size: 15px; color: var(--white); line-height: 1.6; margin-bottom: 32px; font-family: 'DM Sans', sans-serif; }
+    .rev-author { display: flex; align-items: center; gap: 12px; }
+    .r-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px; color: #fff; }
+    .r-name { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 15px; color: var(--white); }
+    .r-sub { font-size: 12px; color: var(--gray); margin-top: 2px; }
+    .rev-controls { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 40px; }
+    .btn-rev { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border2); color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; font-size: 16px; }
+    .btn-rev:hover { background: var(--card2); border-color: var(--gray2); }
+    .rev-dots { display: flex; gap: 8px; }
+    .rdot { width: 8px; height: 8px; border-radius: 50%; background: var(--border2); cursor: pointer; transition: 0.3s; }
+    .rdot.active { background: var(--green); transform: scale(1.3); }
+
     /*  ORDER FORM  */
     #order {
-      background: var(--black)
+      background: transparent
     }
 
     .page-header {
@@ -1318,7 +1379,7 @@
 
     /*  ORDER SUMMARY  */
     #summary {
-      background: var(--black)
+      background: transparent
     }
 
     .summary-outer {
@@ -1407,7 +1468,7 @@
 
     /*  PAYMENT  */
     #payment {
-      background: var(--black)
+      background: transparent
     }
 
     .pay-outer {
@@ -1555,7 +1616,7 @@
 
     /*  CONFIRMATION  */
     #confirm {
-      background: var(--black)
+      background: transparent
     }
 
     .confirm-inner {
@@ -2314,19 +2375,20 @@
     </div>
     <div class="nav-right">
       <button class="nav-wa" onclick="openWA()"><span class="nav-wa-text">WhatsApp</span><span class="nav-wa-icon">WA</span></button>
-      <button id="btn-nav-login" class="nav-wa" onclick="showPage('login')" style="color:var(--white);border-color:var(--border2);"><span class="nav-wa-text">Login</span><span class="nav-wa-icon">👤</span></button>
+      <button id="btn-nav-login" class="nav-wa" onclick="showAuth('login')" style="color:var(--white);border-color:var(--border2);"><span class="nav-wa-text">Login</span><span class="nav-wa-icon">👤</span></button>
       <button id="btn-nav-profile" class="nav-wa" onclick="showPage('profile')" style="color:var(--white);border-color:var(--border2); display:none;"><span class="nav-wa-text">Profile</span><span class="nav-wa-icon">🏠</span></button>
       <button id="btn-nav-order" class="nav-order" onclick="startOrder()" style="display:none !important;">Place Order</button>
     </div>
   </nav>
 
   <!--  AUTHENTICATION SECTIONS  -->
-  <div id="login" class="page">
+  <div id="login" class="auth-modal">
     <div class="auth-container">
+      <button class="btn-close-modal" onclick="closeAuth()">✕</button>
       <div class="auth-card">
         <div class="auth-tabs">
           <div class="auth-tab active">SIGN IN</div>
-          <div class="auth-tab" onclick="showPage('register')">REGISTER</div>
+          <div class="auth-tab" onclick="showAuth('register')">REGISTER</div>
         </div>
         <form id="form-login" onsubmit="handleLogin(event)">
           <div class="field">
@@ -2340,18 +2402,19 @@
           <p id="login-err" class="err" style="display:none; margin-bottom:12px;"></p>
           <button type="submit" class="btn-red" style="width:100%; font-size:18px;">SIGN IN TO SWIFTXPRESS</button>
           <p style="text-align:center; font-size:12px; color:var(--gray); margin-top:20px;">
-            New to SwiftXpress? <span style="color:var(--red); cursor:pointer;" onclick="showPage('register')">Create an account</span>
+            New to SwiftXpress? <span style="color:var(--red); cursor:pointer;" onclick="showAuth('register')">Create an account</span>
           </p>
         </form>
       </div>
     </div>
   </div>
 
-  <div id="register" class="page">
+  <div id="register" class="auth-modal">
     <div class="auth-container">
+      <button class="btn-close-modal" onclick="closeAuth()">✕</button>
       <div class="auth-card">
         <div class="auth-tabs">
-          <div class="auth-tab" onclick="showPage('login')">SIGN IN</div>
+          <div class="auth-tab" onclick="showAuth('login')">SIGN IN</div>
           <div class="auth-tab active">REGISTER</div>
         </div>
         <form id="form-register" onsubmit="handleRegister(event)">
@@ -2374,7 +2437,7 @@
           <p id="reg-err" class="err" style="display:none; margin-bottom:12px;"></p>
           <button type="submit" class="btn-red" style="width:100%; font-size:18px;">CREATE ACCOUNT</button>
           <p style="text-align:center; font-size:12px; color:var(--gray); margin-top:20px;">
-            Already have an account? <span style="color:var(--red); cursor:pointer;" onclick="showPage('login')">Sign in</span>
+            Already have an account? <span style="color:var(--red); cursor:pointer;" onclick="showAuth('login')">Sign in</span>
           </p>
         </form>
       </div>
@@ -2445,72 +2508,180 @@
   <!--  HOME PAGE  -->
   <div id="home" class="page active">
     <div class="hero">
-      <div class="hero-badge"><span class="hero-badge-dot"></span>Riders active now on campus</div>
-      <h1>FAST DELIVERY<br><span class="red">ANYWHERE.</span></h1>
-      <div class="speed-lines"><span></span><span></span><span></span></div>
-      <p class="hero-sub">Food, drinks, groceries, errands — delivered to your hostel door at LAUTECH.</p>
-      <div class="hero-tags">
-        <span class="tag"> Food</span>
-        <span class="tag"> Drinks</span>
-        <span class="tag"> Packages</span>
-        <span class="tag"> Groceries</span>
-        <span class="tag"> Errands</span>
-        <span class="tag"> Campus-wide</span>
+      <div class="hero-badge"><span class="hero-badge-dot"></span>1,000+ students onboard</div>
+      <h1 style="font-size:clamp(56px, 10vw, 100px);line-height:0.9;">GET ANYTHING DONE<br><span class="red">ON CAMPUS.</span></h1>
+      <p class="hero-sub" style="max-width:540px;margin:24px auto;font-size:16px;">We connect LAUTECH students who need errands done with trusted riders. Clear requests, quick matching, and smoother campus logistics from start to finish.</p>
+      
+      <div class="hero-tags" style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:32px;">
+        <span class="tag" style="background:transparent;border:1px solid var(--border2);color:var(--gray)"><span style="color:var(--green)">✓</span> Verified runner profiles</span>
+        <span class="tag" style="background:transparent;border:1px solid var(--border2);color:var(--gray)"><span style="color:var(--green)">✓</span> Transparent payment</span>
+        <span class="tag" style="background:transparent;border:1px solid var(--border2);color:var(--gray)"><span style="color:var(--green)">✓</span> Fast local turnaround</span>
+        <span class="tag" style="background:transparent;border:1px solid var(--border2);color:var(--gray)"><span style="color:var(--green)">✓</span> Built for student life</span>
       </div>
-      <div class="hero-cta">
-        <button id="btn-hero-order" class="btn-red" onclick="startOrder()" style="display:none;"> Place Order</button>
-        <button class="btn-wa" onclick="openWA()"> Chat on WhatsApp</button>
+
+      <div class="hero-cta" style="justify-content:center;">
+        <button id="btn-hero-order" class="btn-red" onclick="startOrder()" style="display:none;font-size:20px;padding:16px 32px"> ASK ON SWIFTXPRESS</button>
+        <button class="btn-wa" onclick="openWA()" style="font-size:18px;padding:16px 32px"> Chat on WhatsApp</button>
       </div>
     </div>
 
     <div class="how">
-      <div class="sec-label reveal">How it works</div>
-      <div class="sec-title reveal">3 SIMPLE STEPS</div>
+      <div class="sec-label reveal" style="text-transform:none;letter-spacing:normal;font-family:'DM Sans',sans-serif;color:var(--gray);font-size:14px">How it works — on campus</div>
+      <div class="sec-title reveal" style="font-family:'DM Sans',sans-serif;font-weight:700;letter-spacing:normal;text-transform:none;">Simple steps to get it done</div>
+      <p class="hero-sub reveal" style="margin:0 auto 40px;max-width:600px;font-size:15px">SwiftXpress connects you with trusted riders on campus. Post what you need, confirm the fee, and watch it get done—securely, swiftly, and transparently.</p>
+      
       <div class="steps-grid">
-        <div class="step">
-          <div class="step-n">01</div>
-          <div class="step-name">Place Order</div>
-          <div class="step-desc">Fill in your order details, pickup & delivery location</div>
+        <div class="step" style="text-align:left;align-items:flex-start;padding:24px;border:1px solid var(--border2);background:transparent">
+          <div class="step-n" style="font-size:12px;width:auto;height:auto;background:transparent;color:var(--gray);font-family:'DM Sans',sans-serif;letter-spacing:0">01. Create</div>
+          <div class="step-name" style="font-family:'DM Sans',sans-serif;letter-spacing:-0.5px;font-size:20px;text-transform:none;margin-top:8px">Post your Request</div>
+          <div class="step-desc" style="text-align:left;line-height:1.6">Describe the task with pickup, drop-off, and preferred item/food details. Clear posts get picked faster.</div>
         </div>
-        <div class="step">
-          <div class="step-n">02</div>
-          <div class="step-name">Pay & Confirm</div>
-          <div class="step-desc">See your total, transfer to our account, we confirm</div>
+        <div class="step" style="text-align:left;align-items:flex-start;padding:24px;border:1px solid var(--border2);background:transparent">
+          <div class="step-n" style="font-size:12px;width:auto;height:auto;background:transparent;color:var(--gray);font-family:'DM Sans',sans-serif;letter-spacing:0">02. Secure Payment</div>
+          <div class="step-name" style="font-family:'DM Sans',sans-serif;letter-spacing:-0.5px;font-size:20px;text-transform:none;margin-top:8px">Pay & Confirm</div>
+          <div class="step-desc" style="text-align:left;line-height:1.6">You pay the agreed delivery fee securely via Paystack. Your payment is verified instantly.</div>
         </div>
-        <div class="step">
-          <div class="step-n">03</div>
-          <div class="step-name">Delivered</div>
-          <div class="step-desc">Rider picks up and brings it straight to your door</div>
+        <div class="step" style="text-align:left;align-items:flex-start;padding:24px;border:1px solid var(--border2);background:transparent">
+          <div class="step-n" style="font-size:12px;width:auto;height:auto;background:transparent;color:var(--gray);font-family:'DM Sans',sans-serif;letter-spacing:0">03. Complete</div>
+          <div class="step-name" style="font-family:'DM Sans',sans-serif;letter-spacing:-0.5px;font-size:20px;text-transform:none;margin-top:8px">Track & Receive</div>
+          <div class="step-desc" style="text-align:left;line-height:1.6">We match you with a rider for live updates and delivery. Get your items delivered safely to your door.</div>
         </div>
       </div>
     </div>
 
-    <div class="what">
-      <div class="sec-label reveal">What we deliver</div>
-      <div class="sec-title reveal">ANYTHING YOU NEED</div>
+    <div class="what" style="padding-top:40px;">
+      <div class="sec-label reveal" style="text-transform:none;letter-spacing:normal;font-family:'DM Sans',sans-serif;color:var(--gray);font-size:14px">People are asking</div>
+      <div class="sec-title reveal" style="font-family:'DM Sans',sans-serif;font-weight:700;letter-spacing:normal;text-transform:none;">What gets done every day</div>
       <div class="items-grid">
-        <div class="item-card">
-          <div class="item-icon"></div>
-          <div class="item-name">Food & Drinks</div>
-          <div class="item-desc">From any canteen, restaurant, or vendor on campus</div>
+        <div class="item-card" style="border-radius:12px">
+          <div class="item-name" style="font-family:'DM Sans',sans-serif;text-transform:none;letter-spacing:0;font-size:18px">Food & Drinks</div>
+          <div class="item-desc">From any canteen, restaurant, or vendor on campus directly to your hostel.</div>
         </div>
-        <div class="item-card">
-          <div class="item-icon"></div>
-          <div class="item-name">Packages</div>
-          <div class="item-desc">Books, documents, items — inter-hostel or faculty</div>
+        <div class="item-card" style="border-radius:12px">
+          <div class="item-name" style="font-family:'DM Sans',sans-serif;text-transform:none;letter-spacing:0;font-size:18px">Packages</div>
+          <div class="item-desc">Books, documents, and personal items transferred between hostels or faculties.</div>
         </div>
-        <div class="item-card">
-          <div class="item-icon"></div>
-          <div class="item-name">Groceries</div>
-          <div class="item-desc">Provisions, toiletries, anything from the market</div>
+        <div class="item-card" style="border-radius:12px">
+          <div class="item-name" style="font-family:'DM Sans',sans-serif;text-transform:none;letter-spacing:0;font-size:18px">Groceries</div>
+          <div class="item-desc">Provisions, toiletries, and anything needed from the local campus market.</div>
         </div>
-        <div class="item-card">
-          <div class="item-icon"></div>
-          <div class="item-name">Errands</div>
-          <div class="item-desc">Printing, photocopy, form submission — we run it</div>
+        <div class="item-card" style="border-radius:12px">
+          <div class="item-name" style="font-family:'DM Sans',sans-serif;text-transform:none;letter-spacing:0;font-size:18px">General Errands</div>
+          <div class="item-desc">Printing, photocopy, form submission, and random tasks—we run it all.</div>
+        </div>
+      </div>
+      
+      <div class="hero-cta" style="justify-content:center;margin-top:48px;">
+        <button class="btn-red" onclick="startOrder()" style="font-size:18px;padding:16px 32px"> ASK ON SWIFTXPRESS</button>
+      </div>
+    </div>
+
+    <!-- REVIEWS SECTION -->
+    <div class="reviews">
+      <div class="sec-label reveal" style="text-transform:none;letter-spacing:normal;font-family:'DM Sans',sans-serif;color:var(--gray);font-size:14px">People are asking on campus</div>
+      <div class="sec-title reveal" style="font-family:'DM Sans',sans-serif;font-weight:700;letter-spacing:normal;text-transform:none;">What Students and Riders say</div>
+      
+      <div class="rev-slider-container reveal">
+        <div class="rev-track" id="rev-track">
+          <!-- Card 1 -->
+          <div class="rev-card active">
+             <div class="quote-icon">“</div>
+             <p class="rev-text">"Ordered food from UnderG and it was at my hostel in 20 minutes. The payment was super smooth and the rider was friendly. Definitely using SwiftXpress weekly now."</p>
+             <div class="rev-author">
+               <div class="r-avatar" style="background:#0F766E">DA</div>
+               <div>
+                  <div class="r-name">David A.</div>
+                  <div class="r-sub">Student • LAUTECH</div>
+               </div>
+             </div>
+          </div>
+          <!-- Card 2 -->
+          <div class="rev-card">
+             <div class="quote-icon">“</div>
+             <p class="rev-text">"As a rider, the verification process was seamless. I get paid exactly what we agree on and everything is transparent. No awkward cash moments—everything just works flawlessly."</p>
+             <div class="rev-author">
+               <div class="r-avatar" style="background:#B45309">SK</div>
+               <div>
+                  <div class="r-name">Samuel K.</div>
+                  <div class="r-sub">Verified Rider</div>
+               </div>
+             </div>
+          </div>
+          <!-- Card 3 -->
+          <div class="rev-card">
+             <div class="quote-icon">“</div>
+             <p class="rev-text">"I had an emergency and needed some documents picked up from my faculty very fast. SwiftXpress handled it perfectly without any delay. Highly recommended for campus errands!"</p>
+             <div class="rev-author">
+               <div class="r-avatar" style="background:#1D4ED8">MO</div>
+               <div>
+                  <div class="r-name">Mercy O.</div>
+                  <div class="r-sub">Student • LAUTECH</div>
+               </div>
+             </div>
+          </div>
+          <!-- Card 4 -->
+          <div class="rev-card">
+             <div class="quote-icon">“</div>
+             <p class="rev-text">"I usually order groceries from the campus market using SwiftXpress. It saves me the stress of walking all the way under the sun. Quality service!"</p>
+             <div class="rev-author">
+               <div class="r-avatar" style="background:#6B21A8">TO</div>
+               <div>
+                  <div class="r-name">Tobi O.</div>
+                  <div class="r-sub">Student • LAUTECH</div>
+               </div>
+             </div>
+          </div>
+          <!-- Card 5 -->
+          <div class="rev-card">
+             <div class="quote-icon">“</div>
+             <p class="rev-text">"Being a rider on SwiftXpress has been an amazing side hustle. I pick my own hours and earn decently without any stress. Highly recommend to everyone."</p>
+             <div class="rev-author">
+               <div class="r-avatar" style="background:#059669">IA</div>
+               <div>
+                  <div class="r-name">Ibrahim A.</div>
+                  <div class="r-sub">Verified Rider</div>
+               </div>
+             </div>
+          </div>
+        </div>
+        
+        <div class="rev-controls">
+           <button class="btn-rev" id="btn-rev-prev" onclick="changeRev(-1)">❮</button>
+           <div class="rev-dots">
+              <span class="rdot active" onclick="goToRev(0)"></span>
+              <span class="rdot" onclick="goToRev(1)"></span>
+              <span class="rdot" onclick="goToRev(2)"></span>
+              <span class="rdot" onclick="goToRev(3)"></span>
+              <span class="rdot" onclick="goToRev(4)"></span>
+           </div>
+           <button class="btn-rev" id="btn-rev-next" onclick="changeRev(1)">❯</button>
         </div>
       </div>
     </div>
+
+    <div class="faq">
+      <div class="sec-label reveal" style="text-transform:none;letter-spacing:normal;font-family:'DM Sans',sans-serif;color:var(--gray);font-size:14px">Got questions?</div>
+      <div class="sec-title reveal" style="font-family:'DM Sans',sans-serif;font-weight:700;letter-spacing:normal;text-transform:none;">Frequently Asked Questions</div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>How fast will my order be delivered?</summary>
+          <div class="faq-body">Most orders within LAUTECH campus are assigned to a rider immediately and delivered within 15-30 minutes after your payment is confirmed.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How do I know the fee for an outside-campus delivery?</summary>
+          <div class="faq-body">When you select "Outside Campus", we will chat with you quickly on WhatsApp to agree on a custom delivery fee based on the distance before you make any secure payment.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Is my payment secure?</summary>
+          <div class="faq-body">Yes! All payments are processed securely via Paystack. Everything is transparent and trackable right on your dashboard.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I order from any vendor on campus?</summary>
+          <div class="faq-body">Absolutely. Just write down the exact canteen, restaurant, or vendor you want, and precisely what you need. Our riders will go directly there and bring it to you.</div>
+        </details>
+      </div>
+    </div>
+
   </div>
 
   <!--  ORDER FORM  -->
@@ -3054,6 +3225,7 @@
         err.textContent = error.message;
         err.style.display = 'block';
       } else {
+        closeAuth();
         showPage('home');
       }
     }
@@ -3102,8 +3274,10 @@
 
           if (!session) {
              alert('Account created! Please check your email to confirm your account before signing in.');
-             showPage('login');
+             closeAuth();
+             showAuth('login');
           } else {
+             closeAuth();
              showPage('home');
           }
         } else {
@@ -3288,15 +3462,30 @@
 
     //  NAVIGATION 
     function showPage(id) {
+      if (id === 'login' || id === 'register') {
+        showAuth(id);
+        return;
+      }
+      closeAuth(); // hide modals if navigating to a real page
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(id).classList.add('active');
       window.scrollTo(0, 0);
     }
+    function showAuth(id) {
+      document.getElementById('login').classList.remove('active-modal');
+      document.getElementById('register').classList.remove('active-modal');
+      document.getElementById(id).classList.add('active-modal');
+    }
+    function closeAuth() {
+      document.getElementById('login').classList.remove('active-modal');
+      document.getElementById('register').classList.remove('active-modal');
+    }
+
     function goHome() { showPage('home'); }
     function startOrder() {
       if (!_user) {
         alert('Kindly sign in to your SwiftXpress account to place an order.');
-        showPage('login');
+        showAuth('login');
         return;
       }
       // Show T&C modal before proceeding to order form
@@ -3966,6 +4155,56 @@
       const e6 = document.getElementById('rcpt-amount'); if (e6) e6.textContent = `₦${INSIDE_FEE}`;
       const e7 = document.getElementById('fail-amount'); if (e7) e7.textContent = `₦${INSIDE_FEE}`;
     });
+
+    //  REVIEWS SLIDER LOGIC 
+    let currentRev = 0;
+    const revCards = document.querySelectorAll('.rev-card');
+    const revDots = document.querySelectorAll('.rdot');
+    const revTrack = document.getElementById('rev-track');
+
+    function updateReviews() {
+        if (!revTrack || revCards.length === 0) return;
+        
+        revCards.forEach((c, idx) => {
+            if (idx === currentRev) c.classList.add('active');
+            else c.classList.remove('active');
+        });
+        revDots.forEach((d, idx) => {
+            if (idx === currentRev) d.classList.add('active');
+            else d.classList.remove('active');
+        });
+        
+        // Calculate center shift
+        const activeCard = revCards[currentRev];
+        const containerWidth = document.querySelector('.rev-slider-container').offsetWidth;
+        
+        // Calculate distance from start of track to center of active card
+        const cardCenterOffset = activeCard.offsetLeft + (activeCard.offsetWidth / 2);
+        
+        // Shift track to align card center with container center
+        const shiftX = (containerWidth / 2) - cardCenterOffset;
+        revTrack.style.transform = `translateX(${shiftX}px)`;
+    }
+
+    function changeRev(direction) {
+        currentRev += direction;
+        if (currentRev < 0) currentRev = revCards.length - 1;
+        if (currentRev >= revCards.length) currentRev = 0;
+        updateReviews();
+    }
+
+    function goToRev(index) {
+        currentRev = index;
+        updateReviews();
+    }
+
+    // Initialize reviews layout on load and window resize
+    window.addEventListener('load', () => { setTimeout(updateReviews, 100); });
+    window.addEventListener('resize', updateReviews);
+    
+    // Auto slide for continuous animation
+    setInterval(() => { changeRev(1); }, 4000);
+
   </script>
   <!--  TRACK ORDER PAGE  -->
   <div id="track" class="page">
