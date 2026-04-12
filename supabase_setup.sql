@@ -109,3 +109,39 @@ create policy "Users can view their own order history"
   on public.orders for select
   using (auth.uid() = user_id or user_id is null);
 
+
+-- ─────────────────────────────────────────────
+-- 11. EATERIES TABLE
+--     Stores the list of eateries/supermarkets
+--     that customers can choose from when ordering food.
+-- ─────────────────────────────────────────────
+create table if not exists public.eateries (
+  id       bigint generated always as identity primary key,
+  name     text not null,
+  category text default 'Canteen',   -- Canteen, Restaurant, Fast Food, Supermarket, etc.
+  location text,                      -- Optional description/location hint
+  active   boolean default true,      -- false = hidden from customer dropdown
+  created_at timestamptz default now()
+);
+
+-- RLS
+alter table public.eateries enable row level security;
+
+-- Allow anyone to read active eateries (for the customer dropdown)
+create policy "Public can read eateries"
+  on public.eateries for select
+  using (true);
+
+-- Allow admin (service role / authenticated) to insert, update, delete
+create policy "Public can manage eateries"
+  on public.eateries for all
+  using (true);
+
+-- Seed some starter eateries (adjust to real LAUTECH spots)
+insert into public.eateries (name, category, location, active) values
+  ('UnderG Canteen',    'Canteen',     'Underground, Main Campus',    true),
+  ('SUB Cafeteria',     'Canteen',     'Student Union Building',      true),
+  ('Sabo Market Spot',  'Fast Food',   'Sabo Gate Area',              true),
+  ('Campus Supermart',  'Supermarket', 'Near Admin Block',            true),
+  ('Mama Put Junction', 'Restaurant',  'Staff Quarters Road',         true)
+on conflict do nothing;
