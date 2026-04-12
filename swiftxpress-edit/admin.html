@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>SwiftXpress — Admin Dashboard</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co https://*.paystack.co https://cdn.jsdelivr.net https://*.jsdelivr.net https://esm.sh https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://paystack.com https://*.paystack.com https://*.paystack.co; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.paystack.co https://paystack.com https://*.paystack.co https://cdn.jsdelivr.net https://*.jsdelivr.net https://esm.sh; frame-src https://checkout.paystack.com https://*.paystack.com https://*.paystack.co; object-src 'none';">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;600;700&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<script src="config.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#E31E24;--red-dark:#B01519;--red-dim:rgba(227,30,36,.12);--red-border:rgba(227,30,36,.3);
+  --black:#080808;--surface:#111;--card:#161616;--card2:#1c1c1c;--border:#252525;--border2:#2e2e2e;
+  --white:#fff;--off:#f0f0f0;--gray:#777;--gray2:#555;
+  --green:#22c55e;--green-dim:rgba(34,197,94,.12);--green-border:rgba(34,197,94,.3);
+  --amber:#f59e0b;--amber-dim:rgba(245,158,11,.12);--amber-border:rgba(245,158,11,.3);
+  --blue:#60a5fa;--blue-dim:rgba(96,165,250,.1);--blue-border:rgba(96,165,250,.3);
+  --purple:#a78bfa;--purple-dim:rgba(167,139,250,.1);--purple-border:rgba(167,139,250,.3);
+  --sidebar:220px;
+}
+html,body{background:var(--black);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh}
+h1,h2,h3,.bebas{font-family:'Bebas Neue',sans-serif;letter-spacing:1px}
+.raj{font-family:'Rajdhani',sans-serif;font-weight:700}
+
+/*  ANIMATIONS  */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(34,197,94,.5)}100%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
+
+/*  LOGIN SCREEN  */
+#login-screen{position:fixed;inset:0;background:var(--black);display:flex;align-items:center;justify-content:center;z-index:999;animation:fadeUp .4s ease}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:44px 40px;width:380px;text-align:center;animation:scaleIn .4s cubic-bezier(.34,1.1,.64,1);box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.login-logo{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:4px}
+.login-logo span{color:var(--red)}
+.login-sub{font-size:12px;color:var(--gray);font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:32px}
+.login-field{text-align:left;margin-bottom:16px}
+.login-field label{display:block;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2.5px;color:var(--gray);margin-bottom:6px;text-transform:uppercase}
+.login-field input{width:100%;background:#0d0d0d;border:1px solid var(--border2);border-radius:8px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border .15s,box-shadow .15s}
+.login-field input:focus{border-color:var(--red);box-shadow:0 0 0 3px var(--red-dim)}
+.login-btn{width:100%;background:var(--red);color:#fff;border:none;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;padding:13px;border-radius:8px;cursor:pointer;transition:all .2s cubic-bezier(.34,1.3,.64,1);margin-top:4px}
+.login-btn:hover{background:var(--red-dark);transform:translateY(-2px);box-shadow:0 6px 20px rgba(227,30,36,.3)}
+.login-err{font-size:12px;color:#ff6b6b;margin-top:10px;min-height:18px}
+.login-lock{margin-bottom:20px;display:flex;justify-content:center;animation:blink 3s ease-in-out infinite}
+
+/*  LAYOUT  */
+#app{display:none;min-height:100vh}
+.layout{display:flex;min-height:100vh}
+
+/*  SIDEBAR  */
+.sidebar{width:var(--sidebar);background:#000;border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:50;animation:slideIn .4s ease}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo .name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--white)}
+.sb-logo .name span{color:var(--red)}
+.sb-logo .sub{font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:3px;color:var(--gray);text-transform:uppercase;margin-top:1px}
+.sb-nav{flex:1;padding:16px 10px;display:flex;flex-direction:column;gap:3px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;cursor:pointer;transition:all .15s;font-family:'Rajdhani',sans-serif;font-weight:600;font-size:13px;letter-spacing:.5px;color:var(--gray);text-transform:uppercase;border:1px solid transparent}
+.sb-item:hover{background:var(--surface);color:var(--white)}
+.sb-item.active{background:var(--red-dim);border-color:var(--red-border);color:var(--red)}
+.sb-item svg{width:15px;height:15px;flex-shrink:0;opacity:.8}
+.sb-divider{height:1px;background:var(--border);margin:8px 12px}
+.sb-bottom{padding:14px 10px;border-top:1px solid var(--border)}
+.sb-live{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:7px;font-size:11px;font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:.5px;color:var(--green)}
+.sb-live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:ping 1.5s ease-in-out infinite}
+
+/*  MAIN  */
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:60px;background:#000;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40}
+.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.tb-btn{background:var(--surface);border:1px solid var(--border);color:var(--gray);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:6px;cursor:pointer;transition:.15s;text-transform:uppercase}
+.tb-btn:hover{color:var(--white);border-color:var(--gray2)}
+.tb-logout{color:#ff6b6b;border-color:rgba(255,107,107,.2)}
+.tb-logout:hover{background:rgba(255,107,107,.08);border-color:rgba(255,107,107,.4);color:#ff6b6b}
+
+/*  CONTENT PANELS  */
+.panel{display:none;padding:28px;animation:fadeUp .3s ease}
+.panel.active{display:block}
+
+/*  STATS GRID  */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:22px 20px;transition:transform .2s ease,box-shadow .2s ease;animation:countUp .5s ease both}
+.stat-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.5)}
+.stat-card:nth-child(1){animation-delay:.05s}
+.stat-card:nth-child(2){animation-delay:.1s}
+.stat-card:nth-child(3){animation-delay:.15s}
+.stat-card:nth-child(4){animation-delay:.2s}
+.stat-label{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:8px}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:42px;line-height:1;margin-bottom:4px}
+.stat-sub{font-size:11px;color:var(--gray);font-family:'Rajdhani',sans-serif}
+.stat-card.s-all .stat-val{color:var(--white)}
+.stat-card.s-pending .stat-val{color:var(--amber)}
+.stat-card.s-paid .stat-val{color:var(--green)}
+.stat-card.s-delivered .stat-val{color:var(--purple)}
+.stat-icon{float:right;opacity:.4;margin-top:-2px;display:flex;align-items:center}
+
+/*  TABLE SECTION  */
+.section-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;animation:fadeUp .4s ease .1s both}
+.section-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);background:var(--surface)}
+.section-head h3{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap}
+.filter-btn{background:var(--card);border:1px solid var(--border);color:var(--gray);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:1px;padding:6px 13px;border-radius:5px;cursor:pointer;transition:.15s;text-transform:uppercase}
+.filter-btn:hover,.filter-btn.active{color:var(--white);border-color:var(--gray2);background:var(--card2)}
+.filter-btn.active.f-pending{color:var(--amber);border-color:var(--amber-border);background:var(--amber-dim)}
+.filter-btn.active.f-paid{color:var(--green);border-color:var(--green-border);background:var(--green-dim)}
+.filter-btn.active.f-assigned{color:var(--blue);border-color:var(--blue-border);background:var(--blue-dim)}
+.filter-btn.active.f-delivered{color:var(--purple);border-color:var(--purple-border);background:var(--purple-dim)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+th{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);padding:11px 16px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface)}
+td{padding:14px 16px;border-bottom:1px solid var(--border);color:var(--white);vertical-align:middle;font-size:13px}
+tr:last-child td{border-bottom:none}
+tr{transition:background .12s}
+tr:hover td{background:rgba(255,255,255,.025)}
+.badge{display:inline-flex;align-items:center;gap:5px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:.5px;padding:4px 10px;border-radius:5px;text-transform:uppercase}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.badge.pending{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border)}
+.badge.pending::before{background:var(--amber)}
+.badge.paid{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.badge.paid::before{background:var(--green)}
+.badge.assigned{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-border)}
+.badge.assigned::before{background:var(--blue)}
+.badge.delivered{background:var(--purple-dim);color:var(--purple);border:1px solid var(--purple-border)}
+.badge.delivered::before{background:var(--purple)}
+.status-select{background:var(--surface);border:1px solid var(--border);color:var(--white);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;padding:5px 8px;border-radius:5px;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;transition:.15s;outline:none}
+.status-select:hover{border-color:var(--gray2)}
+.empty-state{text-align:center;padding:64px 24px;color:var(--gray)}
+.empty-state .big{font-size:44px;margin-bottom:12px;opacity:.4}
+.empty-state p{font-size:13px;line-height:1.6}
+
+/*  SEARCH BAR  */
+.search-bar{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--card)}
+.search-input{flex:1;background:#0d0d0d;border:1px solid var(--border2);border-radius:7px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;transition:border .15s,box-shadow .15s}
+.search-input:focus{border-color:var(--red);box-shadow:0 0 0 3px var(--red-dim)}
+.search-input::placeholder{color:var(--gray2)}
+.search-count{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;color:var(--gray);white-space:nowrap;letter-spacing:.5px}
+
+/*  ORDER DETAIL MODAL  */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:12px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;transform:scale(.93) translateY(12px);transition:transform .25s cubic-bezier(.34,1.1,.64,1);box-shadow:0 32px 80px rgba(0,0,0,.7)}
+.modal-overlay.open .modal{transform:scale(1) translateY(0)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);background:var(--surface)}
+.modal-head h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px}
+.modal-close{background:none;border:1px solid var(--border2);color:var(--gray);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.modal-close:hover{color:var(--white);border-color:var(--gray2)}
+.modal-body{padding:22px 24px}
+.modal-row{display:flex;gap:12px;margin-bottom:14px}
+.modal-field{flex:1}
+.modal-field .mf-label{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:4px}
+.modal-field .mf-val{font-size:14px;color:var(--white);line-height:1.4}
+.modal-divider{height:1px;background:var(--border);margin:16px 0}
+.modal-actions{display:flex;gap:10px;padding:16px 24px;border-top:1px solid var(--border)}
+.modal-actions select{flex:1;background:var(--surface);border:1px solid var(--border2);color:var(--white);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:13px;padding:10px 12px;border-radius:7px;cursor:pointer;outline:none;transition:.15s}
+.modal-actions select:focus{border-color:var(--red)}
+.modal-save{background:var(--red);color:#fff;border:none;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;padding:10px 22px;border-radius:7px;cursor:pointer;transition:all .2s cubic-bezier(.34,1.3,.64,1)}
+.modal-save:hover{background:var(--red-dark);transform:translateY(-1px);box-shadow:0 4px 14px rgba(227,30,36,.3)}
+.modal-wa{background:#0d1a0d;color:#4caf50;border:1px solid #2a3d2a;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;padding:10px 16px;border-radius:7px;cursor:pointer;transition:all .2s;text-transform:uppercase}
+.modal-wa:hover{background:#1e321e;transform:translateY(-1px)}
+
+/*  ANALYTICS PANEL  */
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:22px;animation:fadeUp .4s ease both}
+.chart-card:nth-child(1){animation-delay:.05s}
+.chart-card:nth-child(2){animation-delay:.1s}
+.chart-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:16px}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px}
+.bar{flex:1;border-radius:4px 4px 0 0;transition:height .5s cubic-bezier(.34,1.1,.64,1),opacity .2s;opacity:.7;cursor:pointer;position:relative}
+.bar:hover{opacity:1}
+.bar-label{text-align:center;font-size:10px;color:var(--gray);margin-top:6px;font-family:'Rajdhani',sans-serif;font-weight:600}
+.donut-wrap{display:flex;align-items:center;justify-content:center;gap:24px}
+.donut-legend{display:flex;flex-direction:column;gap:8px}
+.donut-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gray)}
+.donut-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/*  SETTINGS PANEL  */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.settings-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:26px;animation:fadeUp .4s ease both}
+.settings-card h4{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;margin-bottom:16px;color:var(--white)}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:13px;color:var(--white)}
+.setting-sub{font-size:11px;color:var(--gray);margin-top:2px}
+.toggle{width:36px;height:20px;background:var(--border2);border-radius:10px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:var(--green)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform .2s}
+.toggle.on::after{transform:translateX(16px)}
+.sfield{width:100%;background:#0d0d0d;border:1px solid var(--border2);border-radius:6px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;transition:border .15s;margin-top:6px}
+.sfield:focus{border-color:var(--red)}
+.save-btn{background:var(--red);color:#fff;border:none;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;padding:10px 20px;border-radius:6px;cursor:pointer;width:100%;margin-top:16px;transition:all .2s}
+.save-btn:hover{background:var(--red-dark);transform:translateY(-1px)}
+
+/*  TOAST  */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 20px;font-size:13px;color:var(--white);display:flex;align-items:center;gap:10px;z-index:999;transform:translateY(20px);opacity:0;transition:all .3s cubic-bezier(.34,1.2,.64,1);pointer-events:none;font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:.5px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:var(--green-border);color:var(--green)}
+.toast.error{border-color:var(--red-border);color:#ff6b6b}
+
+/*  SCROLLBAR  */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--gray2)}
+
+/*  RESPONSIVE  */
+.mb-menu{display:none;align-items:center;justify-content:center;background:none;border:1px solid var(--border);color:var(--gray);padding:7px 10px;border-radius:6px;cursor:pointer;font-size:18px;line-height:1;transition:.15s}
+.mb-menu:hover{color:var(--white);border-color:var(--gray2)}
+
+/* Sidebar overlay */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:49;backdrop-filter:blur(2px)}
+.sidebar-overlay.open{display:block}
+
+/* ── RESPONSIVE: admin.html ── */
+
+/* Large screens */
+@media(min-width:1280px){
+  :root{--sidebar:240px}
+  .stats-grid{grid-template-columns:repeat(4,1fr)}
+  .panel{padding:32px}
+}
+
+/* Medium screens — keep sidebar, 2-col stats */
+@media(max-width:1100px){
+  :root{--sidebar:200px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .analytics-grid{grid-template-columns:1fr 1fr}
+}
+
+/* Tablet — sidebar becomes drawer */
+@media(max-width:768px){
+  :root{--sidebar:0px}
+
+  .sidebar{
+    transform:translateX(-100%);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+    width:240px;
+    z-index:200;
+    box-shadow:6px 0 40px rgba(0,0,0,.7);
+  }
+  .sidebar.open{transform:translateX(0)}
+
+  .main{margin-left:0;width:100%}
+
+  .topbar{padding:0 14px;height:54px}
+  .topbar-title{font-size:18px}
+  #topbar-date{display:none}
+  .tb-btn{font-size:10px;padding:6px 10px;letter-spacing:.5px}
+
+  .panel{padding:16px}
+
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .stat-card{padding:16px 14px}
+  .stat-val{font-size:34px}
+  .stat-label{font-size:9px}
+
+  .analytics-grid,.settings-grid{grid-template-columns:1fr}
+
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:620px;font-size:12px}
+  th{padding:9px 12px;font-size:9px;letter-spacing:1.5px}
+  td{padding:11px 12px}
+
+  .search-bar{padding:10px 14px}
+  .search-input{font-size:13px}
+
+  .section-head{flex-direction:column;align-items:flex-start;gap:10px;padding:14px 16px}
+  .filter-row{flex-wrap:wrap;gap:5px}
+  .filter-btn{font-size:10px;padding:5px 10px}
+
+  .login-box{width:92%;max-width:380px;padding:36px 28px}
+
+  .mb-menu{display:flex!important}
+
+  /* Modal slides up from bottom */
+  .modal{width:100%;max-width:100%;border-radius:20px 20px 0 0;position:fixed;bottom:0;left:0;max-height:90vh;transform:translateY(100%)}
+  .modal-overlay{align-items:flex-end}
+  .modal-overlay.open .modal{transform:translateY(0)}
+
+  .toast{bottom:16px;right:12px;left:12px;font-size:12px}
+  .settings-card{padding:18px 16px}
+  .chart-card{padding:16px}
+}
+
+/* Mobile */
+@media(max-width:480px){
+  .topbar-right .tb-btn:not(.tb-logout):not(:nth-child(2)){display:none} /* Shows 'New Order +' and 'Sign Out' on mobile */
+  .topbar{height:50px}
+  .topbar-title{font-size:16px}
+
+  .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .stat-val{font-size:28px}
+  .stat-card{padding:14px 12px}
+  .stat-sub{display:none}
+
+  .panel{padding:12px}
+
+  table{min-width:560px;font-size:11px}
+  th{padding:8px 10px}
+  td{padding:10px 10px}
+
+  .login-box{padding:30px 22px}
+  .login-logo{font-size:26px}
+
+  .modal-body{padding:16px 18px}
+  .modal-actions{padding:12px 18px;gap:8px}
+  .modal-head{padding:16px 18px}
+  .mf-val{font-size:13px}
+}
+
+/* Very small */
+@media(max-width:360px){
+  .stats-grid{grid-template-columns:1fr 1fr;gap:6px}
+  .stat-val{font-size:24px}
+  .filter-btn{font-size:9px;padding:4px 8px}
+  .tb-btn.tb-logout{font-size:9px;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-lock">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gray)">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+    </div>
+    <div class="login-logo">Swift<span>Xpress</span></div>
+    <div class="login-sub">Admin Access</div>
+    <div class="login-field">
+      <label>Username</label>
+      <input id="l-user" type="text" placeholder="admin" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="login-btn" onclick="doLogin()">SIGN IN →</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="layout">
+
+    <!-- SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-logo">
+        <div class="name">Swift<span>Xpress</span></div>
+        <div class="sub">Admin Panel</div>
+      </div>
+      <nav class="sb-nav">
+        <div class="sb-item active" onclick="switchPanel('orders',this)" data-panel="orders">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg> Orders
+        </div>
+        <div class="sb-item" onclick="switchPanel('analytics',this)" data-panel="analytics">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Analytics
+        </div>
+        <div class="sb-divider"></div>
+        <div class="sb-item" onclick="switchPanel('settings',this)" data-panel="settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings
+        </div>
+        <div class="sb-item" onclick="switchPanel('eateries',this)" data-panel="eateries">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg> Eateries
+        </div>
+      </nav>
+      <div class="sb-bottom">
+        <div class="sb-live"><span class="sb-live-dot"></span>System Online</div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="mb-menu" id="mb-menu-btn" onclick="toggleSidebar()">&#9776;</button>
+          <div class="topbar-title" id="topbar-title">ORDERS</div>
+        </div>
+        <div class="topbar-right">
+          <span style="font-size:12px;color:var(--gray);font-family:'Rajdhani',sans-serif" id="topbar-date"></span>
+          <button class="tb-btn" style="color:var(--green);border-color:var(--green-border);background:var(--green-dim)" onclick="openCreateModal()">New Order +</button>
+          <button class="tb-btn" onclick="exportCSV()">Export CSV</button>
+          <button class="tb-btn" style="color:#4caf50;border-color:#2a3d2a;background:#0d1a0d" onclick="openWA()">WhatsApp</button>
+          <button class="tb-btn tb-logout" onclick="doLogout()">Sign Out</button>
+        </div>
+      </header>
+
+      <!--  ORDERS PANEL  -->
+      <div class="panel active" id="panel-orders">
+        <div class="stats-grid">
+          <div class="stat-card s-all">
+            <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+            <div class="stat-label">Total Orders</div>
+            <div class="stat-val" id="stat-all">0</div>
+            <div class="stat-sub">All time</div>
+          </div>
+          <div class="stat-card s-pending">
+            <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div class="stat-label">Pending</div>
+            <div class="stat-val" id="stat-pending">0</div>
+            <div class="stat-sub">Awaiting action</div>
+          </div>
+          <div class="stat-card s-paid">
+            <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="stat-label">Paid</div>
+            <div class="stat-val" id="stat-paid">0</div>
+            <div class="stat-sub">Payment confirmed</div>
+          </div>
+          <div class="stat-card s-delivered">
+            <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+            <div class="stat-label">Delivered</div>
+            <div class="stat-val" id="stat-delivered">0</div>
+            <div class="stat-sub">Completed</div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head">
+            <h3>ALL ORDERS</h3>
+            <div class="filter-row">
+              <button class="filter-btn active f-all" onclick="setFilter('all',this)">All</button>
+              <button class="filter-btn f-pending" onclick="setFilter('pending',this)">Pending</button>
+              <button class="filter-btn f-paid" onclick="setFilter('paid',this)">Paid</button>
+              <button class="filter-btn f-assigned" onclick="setFilter('assigned',this)">Assigned</button>
+              <button class="filter-btn f-delivered" onclick="setFilter('delivered',this)">Delivered</button>
+            </div>
+          </div>
+          <div class="search-bar">
+            <input class="search-input" id="search-input" type="text" placeholder="Search by name, phone, item, location…" oninput="renderTable()"/>
+            <span class="search-count" id="search-count">— orders</span>
+          </div>
+          <div class="table-wrap">
+            <div id="empty-state" class="empty-state" style="display:none">
+              <div class="big"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--border2)"><path d="M22 12h-6l-2 3H10L8 12H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>
+              <p>No orders match your filter.<br>Try changing the filter or search term.</p>
+            </div>
+            <table id="orders-table">
+              <thead>
+                <tr>
+                  <th>#ID</th>
+                  <th>Customer</th>
+                  <th>Order</th>
+                  <th>Route</th>
+                  <th>Type</th>
+                  <th>Fee</th>
+                  <th>Time</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!--  ANALYTICS PANEL  -->
+      <div class="panel" id="panel-analytics">
+        <div class="stats-grid" style="margin-bottom:20px">
+          <div class="stat-card s-all">
+            <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+            <div class="stat-label">Total Received</div>
+            <div class="stat-val" id="a-gross">₦0</div>
+            <div class="stat-sub">Gross money (Items + Fees)</div>
+          </div>
+          <div class="stat-card s-delivered">
+            <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="stat-label">Delivery Revenue</div>
+            <div class="stat-val" id="a-revenue">₦0</div>
+            <div class="stat-sub">Net revenue (Excl. items)</div>
+          </div>
+          <div class="stat-card s-paid">
+            <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+            <div class="stat-label">Completion Rate</div>
+            <div class="stat-val" id="a-rate">0%</div>
+            <div class="stat-sub">Delivered / Total</div>
+          </div>
+          <div class="stat-card s-all">
+            <div class="stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+            <div class="stat-label">Total Orders</div>
+            <div class="stat-val" id="a-total">0</div>
+            <div class="stat-sub">All processed orders</div>
+          </div>
+        </div>
+        <div class="analytics-grid">
+          <div class="chart-card">
+            <div class="chart-title">Orders by Status</div>
+            <div id="bar-chart" class="bar-chart"></div>
+            <div id="bar-labels" style="display:flex;gap:6px;margin-top:4px"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Delivery Type Split</div>
+            <div class="donut-wrap">
+              <canvas id="donut-canvas" width="100" height="100"></canvas>
+              <div class="donut-legend" id="donut-legend"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--  SETTINGS PANEL  -->
+      <div class="panel" id="panel-settings">
+        <div class="settings-grid">
+          <div class="settings-card">
+            <h4>Business Info</h4>
+            <div>
+              <label style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:4px">WhatsApp Number</label>
+              <input class="sfield" id="s-wa" type="text" placeholder="e.g. 2348012345678"/>
+            </div>
+            <div style="margin-top:14px">
+              <label style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:4px">Account Name</label>
+              <input class="sfield" id="s-acctname" type="text" placeholder="e.g. Swift Xpress Logistics"/>
+            </div>
+            <div style="margin-top:14px">
+              <label style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:4px">Account Number</label>
+              <input class="sfield" id="s-acctnum" type="text" placeholder="e.g. 8012345678"/>
+            </div>
+            <div style="margin-top:14px">
+              <label style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:4px">Inside Campus Fee (₦)</label>
+              <input class="sfield" id="s-fee" type="number" placeholder="e.g. 700"/>
+            </div>
+            <button class="save-btn" onclick="saveSettings()">SAVE CHANGES</button>
+          </div>
+          <div class="settings-card">
+            <h4>Admin Access</h4>
+            <div>
+              <label style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:4px">New Password</label>
+              <input class="sfield" id="s-newpass" type="password" placeholder="Enter new password"/>
+            </div>
+            <div style="margin-top:14px">
+              <label style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:4px">Confirm Password</label>
+              <input class="sfield" id="s-confpass" type="password" placeholder="Repeat new password"/>
+            </div>
+            <button class="save-btn" onclick="changePassword()">UPDATE PASSWORD</button>
+            <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+              <h4 style="margin-bottom:14px">Notifications</h4>
+              <div class="setting-row">
+                <div><div class="setting-label">New Order Alerts</div><div class="setting-sub">Highlight new orders</div></div>
+                <button class="toggle on" id="t-alerts" onclick="this.classList.toggle('on')"></button>
+              </div>
+              <div class="setting-row">
+                <div><div class="setting-label">Sound on New Order</div><div class="setting-sub">Play a chime</div></div>
+                <button class="toggle" id="t-sound" onclick="this.classList.toggle('on')"></button>
+              </div>
+            </div>
+          </div>
+          <div class="settings-card" style="grid-column:1/-1">
+            <h4>Danger Zone</h4>
+            <div class="setting-row">
+              <div><div class="setting-label" style="color:#ff6b6b">Clear All Orders</div><div class="setting-sub">Permanently delete all order data from storage</div></div>
+              <button id="clear-btn" type="button" onclick="handleClearAllData()" style="background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:6px;cursor:pointer;text-transform:uppercase;transition:.15s" onmouseover="this.style.background='rgba(255,107,107,.2)'" onmouseout="this.style.background='rgba(255,107,107,.1)'">Clear Data</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── EATERIES PANEL ── -->
+      <div class="panel" id="panel-eateries">
+        <div style="max-width:720px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+            <div>
+              <h2 style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;margin-bottom:4px">EATERIES & SUPERMARKETS</h2>
+              <p style="font-size:13px;color:var(--gray)">These appear as dropdown options when customers place a food order</p>
+            </div>
+            <button onclick="openEateryModal()" style="background:var(--red);color:#fff;border:none;border-radius:8px;padding:11px 22px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s" onmouseover="this.style.background='var(--red-dark)'" onmouseout="this.style.background='var(--red)'">
+              + ADD EATERY
+            </button>
+          </div>
+
+          <!-- Eatery Add/Edit Modal (inline) -->
+          <div id="eatery-modal" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px;animation:fadeUp .2s ease">
+            <h4 style="font-family:'Bebas Neue',sans-serif;font-size:20px;margin-bottom:16px" id="eatery-modal-title">ADD NEW EATERY</h4>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+              <div>
+                <label style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:6px">Name *</label>
+                <input id="ea-name" type="text" placeholder="e.g. UnderG Canteen" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--white);border-radius:8px;padding:10px 12px;font-size:14px;font-family:'DM Sans',sans-serif" />
+              </div>
+              <div>
+                <label style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:6px">Category</label>
+                <select id="ea-category" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--white);border-radius:8px;padding:10px 12px;font-size:14px;font-family:'DM Sans',sans-serif;appearance:none">
+                  <option value="Canteen">Canteen</option>
+                  <option value="Restaurant">Restaurant</option>
+                  <option value="Fast Food">Fast Food</option>
+                  <option value="Supermarket">Supermarket</option>
+                  <option value="Bakery">Bakery</option>
+                  <option value="Pharmacy">Pharmacy</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-bottom:14px">
+              <label style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:6px">Location / Description (optional)</label>
+              <input id="ea-location" type="text" placeholder="e.g. Near SUB Gate, LAUTECH" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--white);border-radius:8px;padding:10px 12px;font-size:14px;font-family:'DM Sans',sans-serif" />
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button onclick="saveEatery()" style="background:var(--red);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;cursor:pointer" id="ea-save-btn">SAVE EATERY</button>
+              <button onclick="closeEateryModal()" style="background:transparent;color:var(--gray);border:1px solid var(--border2);border-radius:8px;padding:10px 24px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;cursor:pointer">CANCEL</button>
+            </div>
+            <p id="ea-err" style="display:none;color:var(--red);font-size:13px;margin-top:10px"></p>
+          </div>
+
+          <!-- Eateries Table -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+            <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+              <span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gray)">ALL EATERIES</span>
+              <span id="eatery-count" style="font-size:12px;color:var(--gray)">Loading…</span>
+            </div>
+            <div id="eateries-list" style="min-height:80px;padding:8px 0">
+              <div style="text-align:center;padding:40px;color:var(--gray);font-size:13px">Loading eateries…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /layout -->
+</div><!-- /app -->
+
+<!-- ORDER DETAIL MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>ORDER #<span id="m-id"></span></h3>
+      <button class="modal-close" onclick="closeModal()"></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-row">
+        <div class="modal-field"><div class="mf-label">Customer</div><div class="mf-val" id="m-name"></div></div>
+        <div class="modal-field"><div class="mf-label">Phone</div><div class="mf-val" id="m-phone"></div></div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field" style="flex:2"><div class="mf-label">Order Details</div><div class="mf-val" id="m-item" style="color:var(--off);line-height:1.5"></div></div>
+      </div>
+      <div class="modal-divider"></div>
+      <div class="modal-row">
+        <div class="modal-field"><div class="mf-label">Pickup</div><div class="mf-val" id="m-pickup"></div></div>
+        <div class="modal-field"><div class="mf-label">Delivery</div><div class="mf-val" id="m-dropoff"></div></div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field"><div class="mf-label">Delivery Type</div><div class="mf-val" id="m-type"></div></div>
+        <div class="modal-field">
+          <div class="mf-label">Fee</div>
+          <input id="m-fee" type="text" class="sfield" style="margin-top:4px;color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:18px"/>
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field"><div class="mf-label">Placed At</div><div class="mf-val" id="m-time" style="color:var(--gray)"></div></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <select id="m-status">
+        <option value="pending">Pending</option>
+        <option value="paid">Paid</option>
+        <option value="assigned">Assigned</option>
+        <option value="delivered">Delivered</option>
+      </select>
+      <button id="m-btn-set-price" style="background:var(--blue);border:1px solid var(--blue);color:#fff;display:none;padding:9px 12px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;cursor:pointer;border-radius:6px;text-transform:uppercase" onclick="promptCustomPrice()">SET PRICE</button>
+      <button class="modal-wa" onclick="whatsappOrder()">WhatsApp</button>
+      <button class="modal-save" onclick="saveModal()">SAVE</button>
+      <button class="modal-delete" style="background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;padding:9px 15px;border-radius:6px;cursor:pointer;text-transform:uppercase;transition:.15s" onclick="deleteOrderNow()" onmouseover="this.style.background='rgba(255,107,107,.2)'" onmouseout="this.style.background='rgba(255,107,107,.1)'">Delete</button>
+    </div>
+  </div>
+</div>
+<!-- CREATE ORDER MODAL -->
+<div class="modal-overlay" id="modal-create-overlay" onclick="if(event.target===this)closeCreateModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>CREATE NEW ORDER</h3>
+      <button class="modal-close" onclick="closeCreateModal()"></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="mf-label">Customer Name</label>
+          <input id="c-name" type="text" class="sfield" placeholder="Full name" style="margin-top:6px"/>
+        </div>
+        <div class="modal-field">
+          <label class="mf-label">Phone</label>
+          <input id="c-phone" type="tel" class="sfield" placeholder="080 1234 5678" style="margin-top:6px"/>
+        </div>
+      </div>
+      <div class="modal-row" style="margin-top:14px">
+        <div class="modal-field">
+          <label class="mf-label">Order Description</label>
+          <textarea id="c-item" class="sfield" style="min-height:80px;margin-top:6px" placeholder="What they are ordering..."></textarea>
+        </div>
+      </div>
+      <div class="modal-row" style="margin-top:14px">
+        <div class="modal-field">
+          <label class="mf-label">Pickup</label>
+          <input id="c-pickup" type="text" class="sfield" placeholder="Pickup location" style="margin-top:6px"/>
+        </div>
+        <div class="modal-field">
+          <label class="mf-label">Delivery</label>
+          <input id="c-dropoff" type="text" class="sfield" placeholder="Delivery location" style="margin-top:6px"/>
+        </div>
+      </div>
+      <div class="modal-row" style="margin-top:14px">
+        <div class="modal-field">
+          <label class="mf-label">Delivery Type</label>
+          <select id="c-type" class="sfield" style="margin-top:6px" onchange="document.getElementById('c-fee').value=this.value==='inside'?'₦'+(settings['s-fee']||'700'):'TBD'">
+            <option value="inside">Inside Campus</option>
+            <option value="outside">Outside Campus</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="mf-label">Fee</label>
+          <input id="c-fee" type="text" class="sfield" value="₦..." style="margin-top:6px;color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:18px"/>
+        </div>
+      </div>
+      <div class="modal-row" style="margin-top:14px">
+        <div class="modal-field">
+          <label class="mf-label">Initial Status</label>
+          <select id="c-status" class="sfield" style="margin-top:6px">
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="assigned">Assigned</option>
+            <option value="delivered">Delivered</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-save" style="width:100%" onclick="saveNewOrder()">CREATE ORDER</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- CONFIRMATION MODAL -->
+<div class="modal-overlay" id="modal-confirm-overlay" onclick="if(event.target===this)closeConfirmModal()">
+  <div class="modal" style="width:400px;text-align:center;padding:12px">
+    <div class="modal-body" style="padding:32px 24px">
+      <div style="width:54px;height:54px;background:var(--red-dim);border:1px solid var(--red-border);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+      </div>
+      <h3 style="font-size:24px;margin-bottom:12px">CLEAR ALL DATA?</h3>
+      <p style="font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:28px">This will permanently delete every order record from the database. This action is irreversible.</p>
+      <div style="display:flex;gap:10px">
+        <button class="tb-btn" style="flex:1;padding:12px" onclick="closeConfirmModal()">Cancel</button>
+        <button class="modal-save" style="flex:1;background:var(--red)" onclick="confirmBulkClear()">DELETE ALL</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+//  SUPABASE 
+const _supa = true; // Always try Supabase since we have config.js
+let _supaClient = null;
+
+async function initSupabase() {
+  if (_supa) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+      s.onload = () => {
+        _supaClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+        resolve();
+      };
+      s.onerror = resolve; // fallback gracefully
+      document.head.appendChild(s);
+    });
+  }
+}
+
+//  STATE 
+let orders = [];
+let activeFilter = 'all';
+let modalOrderId = null;
+let settings = JSON.parse(localStorage.getItem('sxSettings') || '{}');
+
+console.log('SwiftXpress Script Loading...');
+
+// ── DELETION LOGIC (Custom Premium Modal) ──
+function handleClearAllData() {
+  const btn = document.getElementById('clear-btn');
+  if (btn.disabled) return;
+  
+  console.log('handleClearAllData triggered');
+  document.getElementById('modal-confirm-overlay').classList.add('open');
+}
+
+function closeConfirmModal() {
+  document.getElementById('modal-confirm-overlay').classList.remove('open');
+}
+
+async function confirmBulkClear() {
+  closeConfirmModal();
+  const btn = document.getElementById('clear-btn');
+  btn.disabled = true;
+  btn.textContent = 'Clearing...';
+  btn.style.opacity = '0.5';
+  
+  try {
+    await executeBulkClear();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Clear Data';
+    btn.style.opacity = '1';
+  }
+}
+
+async function executeBulkClear() {
+  console.log('executeBulkClear started');
+  showToast('Cleaning database...', 'success');
+  
+  if (_supaClient) {
+    try {
+      // Deleting using gte('id', 0) to ensure we hit all numeric IDs
+      const { error } = await _supaClient.from('orders').delete().filter('id', 'gt', 0);
+      if (error) {
+        // Fallback for non-numeric or other cases
+        const { error: error2 } = await _supaClient.from('orders').delete().neq('name', '___NON_EXISTENT___');
+        if (error2) {
+          console.error('Clear failed:', error2);
+          showToast('Database Error: ' + error2.message, 'error');
+          return;
+        }
+      }
+    } catch (e) {
+      console.error('Clear exception:', e);
+      showToast('System error during clear', 'error');
+      return;
+    }
+  }
+  
+  orders = [];
+  renderAll();
+  showToast('DATABASE CLEARED', 'success');
+}
+
+async function deleteOrderNow() {
+  if (!modalOrderId) return;
+  if (!confirm('Permanently delete this order?')) return;
+  
+  if (_supaClient) {
+    const { error } = await _supaClient.from('orders').delete().eq('id', modalOrderId);
+    if (error) {
+      showToast('Delete failed', 'error');
+      return;
+    }
+  }
+  
+  orders = orders.filter(o => String(o.id) !== String(modalOrderId));
+  renderAll();
+  showToast('Order Deleted', 'success');
+  closeModal();
+}
+
+const fmtId = (id) => String(id).padStart(3, '0');
+
+//  AUTH 
+const ADMIN_USER = 'admin';
+let adminPass = localStorage.getItem('sxAdminPass') || 'swift2024';
+
+async function doLogin() {
+  const u = document.getElementById('l-user').value.trim();
+  const p = document.getElementById('l-pass').value;
+  if (u === ADMIN_USER && p === adminPass) {
+    await initSupabase();
+    document.getElementById('login-screen').style.animation = 'fadeUp .3s ease reverse forwards';
+    setTimeout(() => {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      init();
+    }, 280);
+  } else {
+    const err = document.getElementById('login-err');
+    err.textContent = ' Incorrect username or password';
+    document.getElementById('l-pass').value = '';
+    setTimeout(() => err.textContent = '', 3000);
+  }
+}
+
+function doLogout() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-screen').style.animation = 'fadeUp .4s ease';
+  document.getElementById('l-pass').value = '';
+  document.getElementById('login-err').textContent = '';
+}
+
+//  INIT 
+async function init() {
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-NG', {weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  if (settings['s-wa']) document.getElementById('s-wa').value = settings['s-wa'];
+  if (settings['s-acctname']) document.getElementById('s-acctname').value = settings['s-acctname'];
+  if (settings['s-acctnum']) document.getElementById('s-acctnum').value = settings['s-acctnum'];
+  if (settings['s-fee']) document.getElementById('s-fee').value = settings['s-fee'];
+  
+  await loadOrders();
+
+  // ── SUPABASE REALTIME (INSTANT UPDATES) ──
+  if (_supaClient) {
+    let debounceTimer;
+    _supaClient
+      .channel('orders-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+        console.log('Realtime update received:', payload);
+        
+        // Debounce to prevent flickering during bulk operations
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          loadOrders(); 
+        }, 500);
+        
+        // Optional: Play sound or show toast for new orders
+        if (payload.eventType === 'INSERT' && document.getElementById('t-alerts').classList.contains('on')) {
+          showToast(' New order received!', 'success');
+          if (document.getElementById('t-sound').classList.contains('on')) {
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
+            audio.play().catch(() => {});
+          }
+        }
+      })
+      .subscribe();
+  }
+
+  // Fallback Polling (Safety check every 30s)
+  setInterval(() => { if (!modalOrderId) loadOrders(); }, 30000);
+}
+
+//  SUPABASE CRUD 
+async function loadOrders() {
+  if (_supaClient) {
+    const { data, error } = await _supaClient.from('orders').select('*').order('created_at', { ascending: false });
+    if (!error && data) {
+      orders = data;
+    } else if (error) {
+      console.error('Supabase load error:', error);
+      console.error('Error details:', { message: error.message, details: error.details, hint: error.hint });
+      showToast('Database error: ' + error.message, 'error');
+    }
+  } else {
+    showToast('Database connection unavailable', 'error');
+    orders = [];
+  }
+  renderAll();
+}
+
+
+async function updateOrderDB(id, fields) {
+  if (_supaClient) {
+    const { error } = await _supaClient.from('orders').update(fields).eq('id', id);
+    if (error) { showToast('Failed to update', 'error'); return false; }
+  } else {
+    showToast('Database connection missing', 'error');
+    return false;
+  }
+  return true;
+}
+
+
+//  RENDER 
+function renderAll() {
+  renderStats();
+  renderTable();
+  renderAnalytics();
+}
+
+function renderStats() {
+  document.getElementById('stat-all').textContent = orders.length;
+  document.getElementById('stat-pending').textContent = orders.filter(o=>o.status==='pending').length;
+  document.getElementById('stat-paid').textContent = orders.filter(o=>o.status==='paid' || o.status==='delivered').length;
+  document.getElementById('stat-delivered').textContent = orders.filter(o=>o.status==='delivered').length;
+}
+
+function renderTable() {
+  const search = (document.getElementById('search-input')?.value || '').toLowerCase();
+  let filtered = activeFilter === 'all' ? orders : orders.filter(o=>o.status===activeFilter);
+  if (search) {
+    filtered = filtered.filter(o =>
+      o.name.toLowerCase().includes(search) ||
+      o.phone.toLowerCase().includes(search) ||
+      o.item.toLowerCase().includes(search) ||
+      o.pickup.toLowerCase().includes(search) ||
+      o.dropoff.toLowerCase().includes(search) ||
+      o.id.toString().includes(search) ||
+      (o.order_number && o.order_number.toString().includes(search))
+    );
+  }
+  const tbody = document.getElementById('orders-tbody');
+  const empty = document.getElementById('empty-state');
+  const table = document.getElementById('orders-table');
+  document.getElementById('search-count').textContent = filtered.length + ' order' + (filtered.length===1?'':'s');
+
+  if (filtered.length === 0) {
+    empty.style.display = 'block';
+    table.style.display = 'none';
+  } else {
+    empty.style.display = 'none';
+    table.style.display = '';
+    tbody.innerHTML = filtered.slice().reverse().map(o => `
+      <tr>
+        <td style="color:var(--gray);font-size:11px;font-family:'Rajdhani',sans-serif;font-weight:600">#${o.order_number || fmtId(o.id)}</td>
+        <td>
+          <div style="font-weight:500">${esc(o.name)}</div>
+          <div style="font-size:11px;color:var(--gray);margin-top:2px">${esc(o.phone)}</div>
+        </td>
+        <td style="max-width:180px;white-space:normal;line-height:1.4;color:var(--off);font-size:12px">${esc(o.item)}</td>
+        <td>
+          <div style="font-size:11px;color:var(--gray)">${esc(o.pickup)}</div>
+          <div style="font-size:11px;color:var(--gray);margin-top:3px">→ ${esc(o.dropoff)}</div>
+        </td>
+        <td><span style="font-size:11px;padding:3px 8px;border-radius:4px;font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:.5px;${o.type==='inside'?'background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-border)':'background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border)'}">${o.type==='inside'?'IN':'OUT'}</span></td>
+        <td style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--green);letter-spacing:.5px">${esc(o.fee)}</td>
+        <td style="font-size:11px;color:var(--gray);white-space:nowrap">${esc(o.time)}</td>
+        <td><span class="badge ${o.status}">${o.status}</span></td>
+        <td><button onclick="openModal('${o.id}')" style="background:var(--surface);border:1px solid var(--border);color:var(--gray);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:1px;padding:5px 11px;border-radius:5px;cursor:pointer;text-transform:uppercase;transition:.15s" onmouseover="this.style.color='#fff';this.style.borderColor='var(--gray2)'" onmouseout="this.style.color='var(--gray)';this.style.borderColor='var(--border)'">View</button></td>
+      </tr>
+    `).join('');
+  }
+}
+
+function renderAnalytics() {
+  const ins = orders.filter(o=>o.type==='inside').length;
+  const out = orders.filter(o=>o.type==='outside').length;
+  const del = orders.filter(o=>o.status==='delivered').length;
+  const paid = orders.filter(o=>o.status==='paid').length;
+  const assigned = orders.filter(o=>o.status==='assigned').length;
+  const pending = orders.filter(o=>o.status==='pending').length;
+  
+  // Calculate revenue (Gross vs Net)
+  let grossMoney = 0;
+  let deliveryRevenue = 0;
+
+  orders.filter(o => o.status === 'paid' || o.status === 'delivered').forEach(o => {
+    const totalPaid = parseInt(String(o.fee || '0').replace(/[^\d]/g, '')) || 0;
+    grossMoney += totalPaid;
+
+    // Extract items total if present in the item description: [Items Total: ₦1500]
+    const itemCostMatch = String(o.item).match(/\[Items Total: ₦(\d+)\]/);
+    const itemCost = itemCostMatch ? parseInt(itemCostMatch[1]) : 0;
+
+    deliveryRevenue += (totalPaid - itemCost);
+  });
+
+  document.getElementById('a-gross').textContent = '₦' + grossMoney.toLocaleString();
+  document.getElementById('a-revenue').textContent = '₦' + deliveryRevenue.toLocaleString();
+  document.getElementById('a-total').textContent = orders.length;
+  document.getElementById('a-rate').textContent = orders.length ? Math.round(del/orders.length*100)+'%' : '0%';
+
+  // Bar chart
+  const stats = [{label:'Pending',val:pending,color:'var(--amber)'},{label:'Paid',val:paid,color:'var(--green)'},{label:'Assigned',val:assigned,color:'var(--blue)'},{label:'Delivered',val:del,color:'var(--purple)'}];
+  const max = Math.max(...stats.map(s=>s.val), 1);
+  document.getElementById('bar-chart').innerHTML = stats.map(s=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0"><div class="bar" style="width:100%;height:${Math.max(s.val/max*90,4)}px;background:${s.color}" title="${s.label}: ${s.val}"></div></div>`).join('');
+  document.getElementById('bar-labels').innerHTML = stats.map(s=>`<div class="bar-label" style="flex:1">${s.label}<br><strong style="color:var(--white)">${s.val}</strong></div>`).join('');
+
+  // Donut
+  const canvas = document.getElementById('donut-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,100,100);
+  const total = ins + out || 1;
+  const segments = [{val:ins,color:'#60a5fa',label:'Inside'},{val:out,color:'#f59e0b',label:'Outside'}];
+  let angle = -Math.PI/2;
+  segments.forEach(s => {
+    const sweep = (s.val/total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(50,50);
+    ctx.arc(50,50,42,angle,angle+sweep);
+    ctx.fillStyle = s.color;
+    ctx.fill();
+    angle += sweep;
+  });
+  // Hole
+  ctx.beginPath();
+  ctx.arc(50,50,26,0,Math.PI*2);
+  ctx.fillStyle = '#161616';
+  ctx.fill();
+  ctx.font = 'bold 13px Rajdhani,sans-serif';
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.fillText(orders.length, 50, 54);
+
+  document.getElementById('donut-legend').innerHTML = segments.map(s=>`<div class="donut-item"><span class="donut-dot" style="background:${s.color}"></span>${s.label}: <strong style="color:#fff;margin-left:2px">${s.val}</strong></div>`).join('');
+}
+
+//  FILTER 
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+//  WHATSAPP 
+function openWA(msg) {
+  const saved = JSON.parse(localStorage.getItem('sxSettings') || '{}');
+  const num = (saved['s-wa'] || window.WA_NUMBER || '').replace(/\D/g,'');
+  if (!num) { showToast('Set your WhatsApp number in Settings first', 'error'); return; }
+  const text = encodeURIComponent(msg || 'Hi SwiftXpress! I need some help or have a question.');
+  window.open(`https://wa.me/${num}?text=${text}`, '_blank');
+}
+
+function whatsappOrder() {
+  const o = orders.find(x => String(x.id) === String(modalOrderId));
+  if (!o) return;
+  const msg = `SwiftXpress Order #${o.order_number || fmtId(o.id)}\n\nCustomer: ${o.name}\nPhone: ${o.phone}\nOrder: ${o.item}\nPickup: ${o.pickup}\nDelivery: ${o.dropoff}\nType: ${o.type === 'inside' ? 'Inside Campus' : 'Outside Campus'}\nFee: ${o.fee}\nStatus: ${o.status}`;
+  openWA(msg);
+}
+
+//  MODAL 
+function openModal(id) {
+  const o = orders.find(x=>String(x.id)===String(id));
+  if (!o) return;
+  modalOrderId = id;
+  document.getElementById('m-id').textContent = o.order_number || fmtId(o.id);
+  document.getElementById('m-name').textContent = o.name;
+  document.getElementById('m-phone').textContent = o.phone;
+  document.getElementById('m-item').textContent = o.item;
+  document.getElementById('m-pickup').textContent = o.pickup;
+  document.getElementById('m-dropoff').textContent = o.dropoff;
+  document.getElementById('m-type').textContent = o.type === 'inside' ? ' Inside Campus' : ' Outside Campus';
+  document.getElementById('m-btn-set-price').style.display = o.type === 'outside' ? 'inline-block' : 'none';
+  document.getElementById('m-fee').value = o.fee;
+  document.getElementById('m-time').textContent = o.time;
+  document.getElementById('m-status').value = o.status;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function promptCustomPrice() {
+  const custom = prompt('Enter the custom delivery price for this OUTSIDE Campus order (e.g., 600 or 1500):');
+  if (custom) {
+    const num = custom.replace(/[^\d]/g, '');
+    if (num) {
+      document.getElementById('m-fee').value = '₦' + num;
+      // Optional: draw attention to Save button
+      const saveBtn = document.querySelector('.modal-save');
+      saveBtn.style.animation = 'blink 1s ease 3';
+      showToast('Price set! Click SAVE to apply it.', 'success');
+    }
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  modalOrderId = null;
+}
+
+async function saveModal() {
+  const newStatus = document.getElementById('m-status').value;
+  const newFee = document.getElementById('m-fee').value;
+  const ok = await updateOrderDB(modalOrderId, { status: newStatus, fee: newFee });
+  if (ok) {
+    const o = orders.find(x=>String(x.id)===String(modalOrderId));
+    if (o) { o.status = newStatus; o.fee = newFee; }
+    renderAll();
+    showToast(' Order updated', 'success');
+    closeModal();
+  }
+}
+
+function openCreateModal() {
+  document.getElementById('c-name').value = '';
+  document.getElementById('c-phone').value = '';
+  document.getElementById('c-item').value = '';
+  document.getElementById('c-pickup').value = '';
+  document.getElementById('c-dropoff').value = '';
+  document.getElementById('c-type').value = 'inside';
+  document.getElementById('c-fee').value = '₦700';
+  document.getElementById('c-status').value = 'pending';
+  document.getElementById('modal-create-overlay').classList.add('open');
+}
+
+function closeCreateModal() {
+  document.getElementById('modal-create-overlay').classList.remove('open');
+}
+
+async function saveNewOrder() {
+  const btn = document.querySelector('#modal-create-overlay .modal-save');
+  btn.disabled = true; btn.textContent = 'CREATING...';
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' }) + ' · ' +
+    now.toLocaleDateString('en-NG', { day: 'numeric', month: 'short' });
+
+  const orderData = {
+    name: document.getElementById('c-name').value.trim(),
+    phone: document.getElementById('c-phone').value.trim(),
+    item: document.getElementById('c-item').value.trim(),
+    pickup: document.getElementById('c-pickup').value.trim(),
+    dropoff: document.getElementById('c-dropoff').value.trim(),
+    type: document.getElementById('c-type').value,
+    fee: document.getElementById('c-fee').value.trim(),
+    status: document.getElementById('c-status').value,
+    time: timeStr,
+    order_number: Math.floor(1000 + Math.random() * 9000).toString()
+  };
+
+  if (!orderData.name || !orderData.item) {
+    showToast('Name and item are required', 'error');
+    btn.disabled = false; btn.textContent = 'CREATE ORDER';
+    return;
+  }
+
+  if (_supaClient) {
+    const { data, error } = await _supaClient.from('orders').insert([orderData]).select();
+    if (error) {
+      showToast('Insert failed: ' + error.message, 'error');
+    } else {
+      orders.unshift(data[0]);
+      renderAll();
+      showToast(' Manual order created', 'success');
+      closeCreateModal();
+    }
+  }
+
+  btn.disabled = false; btn.textContent = 'CREATE ORDER';
+}
+
+//  SAVE 
+function saveOrders() {
+  renderAll();
+}
+
+//  SETTINGS 
+async function saveSettings() {
+  ['s-wa','s-acctname','s-acctnum','s-fee'].forEach(id => {
+    settings[id] = document.getElementById(id).value;
+  });
+  localStorage.setItem('sxSettings', JSON.stringify(settings));
+  if (settings['s-wa']) window.WA_NUMBER = settings['s-wa'];
+
+  // Also persist delivery_fee and wa_number to Supabase so customers always get the live value
+  if (_supaClient) {
+    const upserts = [];
+    if (settings['s-fee']) upserts.push({ key: 'delivery_fee', value: String(parseInt(settings['s-fee']) || 700) });
+    if (settings['s-wa'])  upserts.push({ key: 'wa_number',    value: settings['s-wa'] });
+    if (upserts.length) {
+      const { error } = await _supaClient.from('settings').upsert(upserts, { onConflict: 'key' });
+      if (error) { showToast('Settings saved locally (DB sync failed)', 'error'); return; }
+    }
+  }
+  showToast(' Settings saved', 'success');
+}
+
+function changePassword() {
+  const np = document.getElementById('s-newpass').value;
+  const cp = document.getElementById('s-confpass').value;
+  if (!np) return showToast('Enter a new password', 'error');
+  if (np !== cp) return showToast('Passwords do not match', 'error');
+  if (np.length < 6) return showToast('Password too short (min 6)', 'error');
+  adminPass = np;
+  localStorage.setItem('sxAdminPass', adminPass);
+  document.getElementById('s-newpass').value = '';
+  document.getElementById('s-confpass').value = '';
+  showToast(' Password updated', 'success');
+}
+
+
+//  EXPORT 
+function exportCSV() {
+  const headers = ['Order #','ID','Name','Phone','Item','Pickup','Dropoff','Type','Fee','Time','Status'];
+  const rows = orders.map(o=>[o.order_number||fmtId(o.id),o.id,o.name,o.phone,o.item,o.pickup,o.dropoff,o.type,o.fee,o.time,o.status].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'swiftxpress-orders.csv';
+  a.click();
+  showToast(' CSV exported', 'success');
+}
+
+//  PANEL SWITCH 
+function switchPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+  const titles = {orders:'ORDERS',analytics:'ANALYTICS',settings:'SETTINGS',eateries:'EATERIES'};
+  document.getElementById('topbar-title').textContent = titles[id] || id.toUpperCase();
+  if (id==='analytics') renderAnalytics();
+  if (id==='eateries') loadAdminEateries();
+}
+
+// ── EATERIES ADMIN ──
+let editingEateryId = null;
+
+async function loadAdminEateries() {
+  const list = document.getElementById('eateries-list');
+  const count = document.getElementById('eatery-count');
+  list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray);font-size:13px">Loading…</div>';
+  if (!_supaClient) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray);font-size:13px">Supabase not connected</div>';
+    return;
+  }
+  const { data, error } = await _supaClient.from('eateries').select('*').order('name');
+  if (error) {
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--red);font-size:13px">Error: ${error.message}</div>`;
+    return;
+  }
+  count.textContent = `${data.length} eateri${data.length === 1 ? 'y' : 'ies'}`;
+  if (!data.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray);font-size:13px">No eateries yet. Click + ADD EATERY to get started.</div>';
+    return;
+  }
+  list.innerHTML = data.map(e => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap" id="ea-row-${e.id}">
+      <div style="flex:1;min-width:180px">
+        <div style="font-weight:600;font-size:14px;color:var(--white)">${esc(e.name)}</div>
+        <div style="font-size:12px;color:var(--gray);margin-top:2px">${esc(e.category||'')}${e.location ? ' · ' + esc(e.location) : ''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <button onclick="toggleEatery(${e.id},${e.active})" style="background:${e.active ? 'var(--green-dim)' : 'var(--red-dim)'};border:1px solid ${e.active ? 'var(--green-border)' : 'var(--red-border)'};color:${e.active ? 'var(--green)' : 'var(--red)'};border-radius:20px;padding:5px 14px;font-size:11px;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px;cursor:pointer;transition:.15s" id="ea-toggle-${e.id}">${e.active ? 'ACTIVE' : 'HIDDEN'}</button>
+        <button onclick="openEateryModal(${e.id},'${esc(e.name)}','${esc(e.category||'')}','${esc(e.location||'')}')" style="background:var(--surface);border:1px solid var(--border2);color:var(--white);border-radius:6px;padding:6px 12px;font-size:11px;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px;cursor:pointer">EDIT</button>
+        <button onclick="deleteEatery(${e.id},'${esc(e.name)}')" style="background:var(--red-dim);border:1px solid var(--red-border);color:var(--red);border-radius:6px;padding:6px 12px;font-size:11px;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px;cursor:pointer">DEL</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openEateryModal(id, name, category, location) {
+  editingEateryId = id || null;
+  document.getElementById('eatery-modal-title').textContent = id ? 'EDIT EATERY' : 'ADD NEW EATERY';
+  document.getElementById('ea-name').value = name || '';
+  document.getElementById('ea-category').value = category || 'Canteen';
+  document.getElementById('ea-location').value = location || '';
+  document.getElementById('ea-err').style.display = 'none';
+  document.getElementById('eatery-modal').style.display = 'block';
+  document.getElementById('ea-name').focus();
+}
+function closeEateryModal() {
+  document.getElementById('eatery-modal').style.display = 'none';
+  editingEateryId = null;
+}
+
+async function saveEatery() {
+  const btn = document.getElementById('ea-save-btn');
+  const name = document.getElementById('ea-name').value.trim();
+  const category = document.getElementById('ea-category').value;
+  const location = document.getElementById('ea-location').value.trim();
+  const errEl = document.getElementById('ea-err');
+  errEl.style.display = 'none';
+  if (!name) { errEl.textContent = 'Name is required.'; errEl.style.display = 'block'; return; }
+  btn.textContent = 'SAVING…'; btn.disabled = true;
+  try {
+    let error;
+    if (editingEateryId) {
+      ({ error } = await _supaClient.from('eateries').update({ name, category, location }).eq('id', editingEateryId));
+    } else {
+      ({ error } = await _supaClient.from('eateries').insert([{ name, category, location, active: true }]));
+    }
+    if (error) throw error;
+    closeEateryModal();
+    showToast(editingEateryId ? ' Eatery updated' : ' Eatery added', 'success');
+    loadAdminEateries();
+  } catch (err) {
+    errEl.textContent = err.message || 'Save failed. Try again.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'SAVE EATERY'; btn.disabled = false;
+  }
+}
+
+async function toggleEatery(id, currentlyActive) {
+  const newState = !currentlyActive;
+  const btn = document.getElementById(`ea-toggle-${id}`);
+  if (btn) btn.textContent = '…';
+  const { error } = await _supaClient.from('eateries').update({ active: newState }).eq('id', id);
+  if (error) { showToast('Toggle failed', 'error'); return; }
+  showToast(newState ? 'Eatery set to Active' : 'Eatery Hidden', 'success');
+  loadAdminEateries();
+}
+
+async function deleteEatery(id, name) {
+  if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+  const { error } = await _supaClient.from('eateries').delete().eq('id', id);
+  if (error) { showToast('Delete failed: ' + error.message, 'error'); return; }
+  showToast(' Eatery deleted', 'success');
+  loadAdminEateries();
+}
+
+//  TOAST 
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+//  UTILS 
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── SIDEBAR TOGGLE (MOBILE) ──
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const isOpen = sidebar.classList.contains('open');
+  if (isOpen) {
+    closeSidebar();
+  } else {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+  }
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// Close sidebar when a nav item is clicked on mobile
+document.querySelectorAll('.sb-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 768) closeSidebar();
+  });
+});
+
+// Close sidebar on scroll (mobile)
+let _lastScrollY = 0;
+window.addEventListener('scroll', () => {
+  if (window.innerWidth <= 768) {
+    const currentY = window.scrollY;
+    if (Math.abs(currentY - _lastScrollY) > 10) {
+      closeSidebar();
+    }
+    _lastScrollY = currentY;
+  }
+}, { passive: true });
+
+// Close sidebar on any touch outside it (mobile)
+document.addEventListener('touchstart', e => {
+  if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar.classList.contains('open') && !sidebar.contains(e.target)) {
+      closeSidebar();
+    }
+  }
+}, { passive: true });
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeSidebar(); }
+});
+</script>
+</body>
+</html>
