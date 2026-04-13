@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co https://*.paystack.co https://cdn.jsdelivr.net https://*.jsdelivr.net https://esm.sh https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://paystack.com https://*.paystack.com https://*.paystack.co; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.paystack.co https://paystack.com https://*.paystack.co https://cdn.jsdelivr.net https://*.jsdelivr.net https://esm.sh; frame-src https://checkout.paystack.com https://*.paystack.com https://*.paystack.co; object-src 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co https://*.paystack.co https://cdn.jsdelivr.net https://*.jsdelivr.net https://esm.sh https://fonts.googleapis.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://paystack.com https://*.paystack.com https://*.paystack.co https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.paystack.co https://paystack.com https://*.paystack.co https://cdn.jsdelivr.net https://*.jsdelivr.net https://esm.sh https://accounts.google.com https://*.googleapis.com; frame-src https://checkout.paystack.com https://*.paystack.com https://*.paystack.co https://accounts.google.com; object-src 'none';">
   <title>SwiftXpress — LAUTECH Fast Delivery</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;600;700&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap"
@@ -673,6 +673,54 @@
     .auth-tab.active {
       color: var(--red);
     }
+
+    /* ── Google Auth Button ── */
+    .btn-google {
+      width: 100%; display: flex; align-items: center; justify-content: center;
+      gap: 10px; background: #fff; color: #1f1f1f; border: 1px solid #dadce0;
+      border-radius: 8px; padding: 11px 16px; font-size: 14px; font-weight: 600;
+      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background .15s, box-shadow .15s;
+      margin-bottom: 4px;
+    }
+    .btn-google:hover { background: #f8f8f8; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+    .btn-google svg { flex-shrink: 0; }
+    .auth-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 16px 0; color: var(--gray); font-size: 12px;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content:''; flex:1; height:1px; background: var(--border2);
+    }
+
+    /* ── Delivery Type Picker Page ── */
+    .dtype-page { max-width: 600px; margin: 0 auto; padding: 32px 20px 80px; }
+    .dtype-page h2 { font-family:'Bebas Neue',sans-serif; font-size:32px; margin-bottom:6px; }
+    .dtype-page p { color:var(--gray); font-size:14px; margin-bottom:32px; }
+    .dtype-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+    @media(max-width:600px){ .dtype-grid { grid-template-columns:1fr; } }
+    .dtype-card {
+      background:var(--card); border:1px solid var(--border); border-radius:16px;
+      padding:28px 20px; cursor:pointer; text-align:center;
+      transition: border-color .2s, transform .2s, background .2s;
+      display:flex; flex-direction:column; align-items:center; gap:12px;
+    }
+    .dtype-card:hover { border-color:var(--red-border); transform:translateY(-2px); background:var(--card2); }
+    .dtype-icon { font-size:40px; line-height:1; }
+    .dtype-name { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; }
+    .dtype-desc { font-size:12px; color:var(--gray); line-height:1.5; }
+
+    /* ── Eatery Dropdown ── */
+    .eatery-select {
+      width:100%; background:var(--surface); border:1px solid var(--border2);
+      color:var(--white); border-radius:8px; padding:12px 14px; font-size:14px;
+      font-family:'DM Sans',sans-serif; cursor:pointer; appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23777' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right 14px center; padding-right:36px;
+      transition: border-color .15s;
+    }
+    .eatery-select:focus { outline:none; border-color:var(--red-border); }
+    .eatery-loading { color:var(--gray); font-size:12px; padding:8px 0; }
+
     .profile-header {
       background: linear-gradient(180deg, #000 0%, #111 100%);
       padding: 40px 24px;
@@ -2243,6 +2291,63 @@
       .modal-btn-agree, .modal-btn-disagree { font-size: 18px; padding: 12px }
     }
 
+    /* Review Modal */
+    .review-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 9999;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .review-modal-overlay.open { opacity: 1; pointer-events: all; }
+    .review-modal-box {
+      background: var(--card); border: 1px solid var(--border2); border-radius: 16px;
+      width: 100%; max-width: 440px; padding: 28px 24px;
+      transform: translateY(24px); transition: transform 0.3s;
+    }
+    .review-modal-overlay.open .review-modal-box { transform: translateY(0); }
+    .review-modal-title {
+      font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; margin-bottom: 4px;
+    }
+    .review-modal-sub { font-size: 13px; color: var(--gray); margin-bottom: 20px; }
+    .star-row { display: flex; gap: 8px; margin-bottom: 20px; }
+    .star-btn {
+      font-size: 28px; background: none; border: none; cursor: pointer; opacity: 0.3;
+      transition: opacity 0.2s, transform 0.15s; line-height: 1;
+    }
+    .star-btn.lit { opacity: 1; transform: scale(1.15); }
+    .review-textarea {
+      width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: 8px;
+      color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 14px;
+      padding: 12px; resize: none; height: 100px; margin-bottom: 16px; box-sizing: border-box;
+    }
+    .review-textarea:focus { outline: none; border-color: var(--red); }
+    .review-name-input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: 8px;
+      color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 14px;
+      padding: 12px; margin-bottom: 16px; box-sizing: border-box;
+    }
+    .review-name-input:focus { outline: none; border-color: var(--red); }
+    .review-modal-actions { display: flex; gap: 12px; }
+    .btn-submit-review {
+      flex: 1; background: var(--red); color: #fff; border: none; border-radius: 8px;
+      font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px;
+      padding: 13px; cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-submit-review:hover { opacity: 0.85; }
+    .btn-submit-review:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-cancel-review {
+      background: transparent; color: var(--gray); border: 1px solid var(--border2);
+      border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+      padding: 13px 18px; cursor: pointer; transition: 0.2s;
+    }
+    .btn-cancel-review:hover { color: var(--white); border-color: var(--gray2); }
+    .btn-write-review {
+      background: transparent; border: 1px solid var(--border2); color: var(--white);
+      border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 600;
+      font-size: 14px; padding: 12px 24px; cursor: pointer; transition: 0.2s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-write-review:hover { border-color: var(--red); color: var(--red); }
+
     /* Nav WA button responsive text */
     .nav-wa-icon {
       display: none
@@ -2391,6 +2496,11 @@
           <div class="auth-tab" onclick="showAuth('register')">REGISTER</div>
         </div>
         <form id="form-login" onsubmit="handleLogin(event)">
+          <button type="button" class="btn-google" onclick="handleGoogleAuth()">
+            <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/><path d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+            Continue with Google
+          </button>
+          <div class="auth-divider"><span>or sign in with email</span></div>
           <div class="field">
             <label>Email Address</label>
             <input type="email" id="login-email" placeholder="e.g. user@student.lautech.edu.ng" required />
@@ -2418,6 +2528,11 @@
           <div class="auth-tab active">REGISTER</div>
         </div>
         <form id="form-register" onsubmit="handleRegister(event)">
+          <button type="button" class="btn-google" onclick="handleGoogleAuth()">
+            <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/><path d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+            Sign up with Google
+          </button>
+          <div class="auth-divider"><span>or register with email</span></div>
           <div class="field">
             <label>Full Name</label>
             <input type="text" id="reg-name" placeholder="e.g. John Doe" required />
@@ -2657,6 +2772,9 @@
            <button class="btn-rev" id="btn-rev-next" onclick="changeRev(1)">❯</button>
         </div>
       </div>
+      <div style="margin-top:28px;">
+        <button class="btn-write-review" onclick="openReviewModal()">✍️ Write a Review</button>
+      </div>
     </div>
 
     <div class="faq">
@@ -2685,9 +2803,214 @@
   </div>
 
   <!--  ORDER FORM  -->
+  <!-- ── DELIVERY TYPE PICKER ── -->
+  <div id="dtype" class="page">
+    <div class="page-header">
+      <h2>WHAT DO YOU NEED?</h2>
+      <p>Choose the type of service you want</p>
+    </div>
+    <div class="dtype-page">
+      <div class="dtype-grid">
+        <div class="dtype-card" onclick="selectDeliveryType('delivery')">
+          <div class="dtype-icon">📦</div>
+          <div class="dtype-name">Package Delivery</div>
+          <div class="dtype-desc">Papers, bags, laundry or any item moved for you</div>
+        </div>
+        <div class="dtype-card" onclick="selectDeliveryType('food')">
+          <div class="dtype-icon">🍔</div>
+          <div class="dtype-name">Food Order</div>
+          <div class="dtype-desc">Order from your favourite eatery or supermarket</div>
+        </div>
+        <div class="dtype-card" onclick="selectDeliveryType('errand')">
+          <div class="dtype-icon">🛒</div>
+          <div class="dtype-name">Errand</div>
+          <div class="dtype-desc">Need something done? We'll handle it for you</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOOD ORDER PAGE ── -->
+  <div id="food-order" class="page">
+    <div class="page-header">
+      <h2>FOOD ORDER</h2>
+      <p>Pick your eatery and tell us what you want</p>
+      <div class="progress" style="margin-top:24px">
+        <div class="prog-step">
+          <div class="prog-dot active" id="fpd1">1</div>
+          <div class="prog-label active" id="fpl1">Order</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step">
+          <div class="prog-dot" id="fpd2">2</div>
+          <div class="prog-label" id="fpl2">Summary</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step">
+          <div class="prog-dot" id="fpd3">3</div>
+          <div class="prog-label" id="fpl3">Payment</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step">
+          <div class="prog-dot" id="fpd4">4</div>
+          <div class="prog-label" id="fpl4">Confirm</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-outer">
+      <div class="form-card">
+        <div class="row2">
+          <div class="field">
+            <label>Full Name</label>
+            <input id="fo-name" type="text" placeholder="Your full name" />
+            <div class="err" id="fo-err-name">Please enter your name</div>
+          </div>
+          <div class="field">
+            <label>Phone Number</label>
+            <input id="fo-phone" type="tel" placeholder="0801 234 5678" />
+            <div class="err" id="fo-err-phone">Enter a valid phone number</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Select Eatery / Supermarket</label>
+          <p class="eatery-loading" id="eatery-loading">Loading eateries…</p>
+          <select class="eatery-select" id="fo-eatery" style="display:none">
+            <option value="">-- Choose an eatery --</option>
+          </select>
+          <div class="err" id="fo-err-eatery">Please select an eatery</div>
+        </div>
+        <div class="field">
+          <label>What do you want to order?</label>
+          <div id="fo-items-container">
+            <div class="food-item-row" style="display:flex;gap:8px;margin-bottom:8px">
+              <input type="text" class="fo-item-name" placeholder="Item name" style="flex:2" />
+              <input type="number" class="fo-item-qty" placeholder="Qty" style="flex:1" min="1" oninput="calcFoTotal()" />
+              <input type="number" class="fo-item-price" placeholder="Price (₦)" style="flex:1" min="0" oninput="calcFoTotal()" />
+            </div>
+          </div>
+          <button class="btn-outline-red" style="margin-top:8px;font-size:12px;padding:8px 16px;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500" onclick="addFoItem()">+ Add another item</button>
+          <div style="margin-top:12px;font-size:14px;color:var(--white);font-weight:500" id="fo-total-display">Items Total: ₦0</div>
+          <div class="err" id="fo-err-items">Please add at least one item with name, quantity, and price.</div>
+        </div>
+        <div class="field">
+          <label>Delivery Location</label>
+          <div id="fo-addr-selection-wrap" style="display:none; margin-bottom:8px;">
+            <p style="font-size:11px; color:var(--gray); margin-bottom:10px;">Select your delivery option:</p>
+            <div class="addr-picker">
+              <div class="addr-opt active" id="fo-addr-opt-home" onclick="foUseSavedAddr()">SAME AS PROFILE</div>
+              <div class="addr-opt" id="fo-addr-opt-change" onclick="foChangeAddr()">CHANGE ADDRESS</div>
+            </div>
+          </div>
+          <input id="fo-dropoff" type="text" placeholder="e.g. Hostel B, Room 212" />
+          <div class="err" id="fo-err-dropoff">Enter your delivery location</div>
+        </div>
+        <div class="field">
+          <label>Delivery Type</label>
+          <div class="type-grid">
+            <div class="type-opt selected" id="fo-opt-inside" onclick="foSelectType('inside')">
+              <div class="type-name">Inside Campus</div>
+              <div class="type-fee" id="fo-txt-inside-fee">Fixed fee — ₦...</div>
+            </div>
+            <div class="type-opt" id="fo-opt-outside" onclick="foSelectType('outside')">
+              <div class="type-name">Outside Campus</div>
+              <div class="type-fee">Custom pricing via WhatsApp</div>
+            </div>
+          </div>
+          <div class="outside-notice hidden" id="fo-outside-notice">
+            <strong>⚡ Custom Pricing</strong>
+            Delivery fee will be calculated and sent to you via WhatsApp before payment.
+          </div>
+        </div>
+        <button class="btn-full" onclick="submitFoodOrder()">REVIEW ORDER →</button>
+        <button class="btn-outline-red" style="width:100%;margin-top:12px;background:transparent;border:1px solid var(--border2);color:var(--gray);border-radius:8px;padding:14px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;font-size:14px" onclick="showPage('dtype')">← Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ERRAND PAGE ── -->
+  <div id="errand" class="page">
+    <div class="page-header">
+      <h2>PLACE AN ERRAND</h2>
+      <p>Describe your task and we'll handle it</p>
+      <div class="progress" style="margin-top:24px">
+        <div class="prog-step">
+          <div class="prog-dot active">1</div>
+          <div class="prog-label active">Details</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step">
+          <div class="prog-dot">2</div>
+          <div class="prog-label">Summary</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step">
+          <div class="prog-dot">3</div>
+          <div class="prog-label">Payment</div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step">
+          <div class="prog-dot">4</div>
+          <div class="prog-label">Confirm</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-outer">
+      <div class="form-card">
+        <div class="row2">
+          <div class="field">
+            <label>Full Name</label>
+            <input id="er-name" type="text" placeholder="Your full name" />
+            <div class="err" id="er-err-name">Please enter your name</div>
+          </div>
+          <div class="field">
+            <label>Phone Number</label>
+            <input id="er-phone" type="tel" placeholder="0801 234 5678" />
+            <div class="err" id="er-err-phone">Enter a valid phone number</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Describe the Errand</label>
+          <textarea id="er-task" placeholder="E.g. Pick up my clothes from the dry cleaner at Sabo and bring to Hostel B Room 12..." style="min-height:110px"></textarea>
+          <div class="err" id="er-err-task">Please describe your errand</div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Pickup Location</label>
+            <input id="er-pickup" type="text" placeholder="e.g. Sabo Market" />
+            <div class="err" id="er-err-pickup">Enter pickup location</div>
+          </div>
+          <div class="field">
+            <label>Delivery Location</label>
+            <input id="er-dropoff" type="text" placeholder="e.g. Hostel B, Room 12" />
+            <div class="err" id="er-err-dropoff">Enter delivery location</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Delivery Type</label>
+          <div class="type-grid">
+            <div class="type-opt selected" id="er-opt-inside" onclick="erSelectType('inside')">
+              <div class="type-name">Inside Campus</div>
+              <div class="type-fee" id="er-txt-inside-fee">Fixed fee — ₦...</div>
+            </div>
+            <div class="type-opt" id="er-opt-outside" onclick="erSelectType('outside')">
+              <div class="type-name">Outside Campus</div>
+              <div class="type-fee">Custom pricing via WhatsApp</div>
+            </div>
+          </div>
+          <div class="outside-notice hidden" id="er-outside-notice">
+            <strong>⚡ Custom Pricing</strong>
+            Delivery fee will be calculated and sent via WhatsApp before payment.
+          </div>
+        </div>
+        <button class="btn-full" onclick="submitErrand()">REVIEW ORDER →</button>
+        <button class="btn-outline-red" style="width:100%;margin-top:12px;background:transparent;border:1px solid var(--border2);color:var(--gray);border-radius:8px;padding:14px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;font-size:14px" onclick="showPage('dtype')">← Back</button>
+      </div>
+    </div>
+  </div>
+
   <div id="order" class="page">
     <div class="page-header">
-      <h2>PLACE YOUR ORDER</h2>
+      <h2>PACKAGE DELIVERY</h2>
       <p>Fill in all details accurately for fastest service</p>
       <div class="progress" style="margin-top:24px">
         <div class="prog-step">
@@ -2725,42 +3048,12 @@
             <div class="err" id="err-phone">Enter a valid phone number</div>
           </div>
         </div>
-        <div class="field">
-          <label>Category</label>
-          <div class="type-grid">
-            <div class="type-opt selected" id="cat-food" onclick="selectCat('food')">
-              <div class="type-name">Food</div>
-              <div class="type-fee">Structured items</div>
-            </div>
-            <div class="type-opt" id="cat-other" onclick="selectCat('other')">
-              <div class="type-name">Other Services</div>
-              <div class="type-fee">Goods, errands, etc.</div>
-            </div>
-          </div>
-        </div>
-
-        <div id="sect-food">
+        <div id="sect-other">
           <div class="field">
-            <label>What do you want to get?</label>
-            <div id="food-items-container">
-               <div class="food-item-row" style="display:flex;gap:8px;margin-bottom:8px">
-                 <input type="text" class="f-food-name" placeholder="Item name" style="flex:2" />
-                 <input type="number" class="f-food-qty" placeholder="Qty" style="flex:1" min="1" oninput="calcFoodTotal()" />
-                 <input type="number" class="f-food-price" placeholder="Price (₦)" style="flex:1" min="0" oninput="calcFoodTotal()" />
-               </div>
-            </div>
-            <button class="btn-outline-red" style="margin-top:8px;font-size:12px;padding:8px 16px;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500" onclick="addFoodItem()">+ Add another item</button>
-            <div style="margin-top:12px;font-size:14px;color:var(--white);font-weight:500" id="food-total-display">Items Total: ₦0</div>
-            <div class="err" id="err-food">Please add at least one valid item with name, quantity, and price.</div>
-          </div>
-        </div>
-
-        <div id="sect-other" class="hidden">
-          <div class="field">
-            <label>What do you want?</label>
+            <label>What do you want to deliver?</label>
             <textarea id="f-item"
-              placeholder="Describe exactly what you want — e.g. Picking up my clothes from the dry cleaner..."></textarea>
-            <div class="err" id="err-item">Please describe your order</div>
+              placeholder="e.g. My laundry bag from Moremi to Jaja Hall, or a textbook to Faculty of Engineering..."></textarea>
+            <div class="err" id="err-item">Please describe the items to be delivered</div>
           </div>
         </div>
         <div class="row2">
@@ -2801,10 +3094,10 @@
           </div>
         </div>
         <button class="btn-full" onclick="submitOrder()">REVIEW ORDER →</button>
+        <button class="btn-outline-red" style="width:100%;margin-top:12px;background:transparent;border:1px solid var(--border2);color:var(--gray);border-radius:8px;padding:14px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;font-size:14px" onclick="showPage('dtype')">← Back</button>
       </div>
     </div>
   </div>
-
   <!--  SUMMARY  -->
   <div id="summary" class="page">
     <div class="page-header">
@@ -3071,11 +3364,11 @@
           style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;padding:14px;border-radius:6px;border:none;cursor:pointer;width:100%;background:var(--green);color:#000">
           CHAT US ON WHATSAPP</button>
         <button class="btn-outline-red" onclick="startOrder()">Place Another Order</button>
+        <button class="btn-write-review" style="width:100%;justify-content:center;margin-top:4px;" onclick="openReviewModal()">✍️ Leave a Review</button>
       </div>
     </div>
   </div>
 
-  <!--  FAILED PAYMENT RECEIPT  -->
   <div id="pay-failed" class="page">
     <div class="confirm-inner">
       <div style="font-size:64px;margin-bottom:16px;animation:floatY 3s ease-in-out infinite">❌</div>
@@ -3461,7 +3754,7 @@
     const generateOrderNumber = () => Math.floor(1000 + Math.random() * 9000).toString();
 
     //  NAVIGATION 
-    function showPage(id) {
+    function showPage(id, pushState = true) {
       if (id === 'login' || id === 'register') {
         showAuth(id);
         return;
@@ -3470,7 +3763,24 @@
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(id).classList.add('active');
       window.scrollTo(0, 0);
+      if (pushState) {
+        history.pushState({ page: id }, '', '#' + id);
+      }
     }
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', function(e) {
+      const page = e.state?.page || 'home';
+      showPage(page, false);
+    });
+
+    // Set initial history state
+    (function() {
+      const hash = location.hash.replace('#', '');
+      const validPages = ['home','dtype','order','food-order','errand','summary','payment','confirm','pay-failed','profile'];
+      const startPage = validPages.includes(hash) ? hash : 'home';
+      history.replaceState({ page: startPage }, '', startPage === 'home' ? location.pathname : '#' + startPage);
+    })();
     function showAuth(id) {
       document.getElementById('login').classList.remove('active-modal');
       document.getElementById('register').classList.remove('active-modal');
@@ -3493,11 +3803,23 @@
     }
     async function tncAgree() {
       document.getElementById('tnc-modal').classList.remove('open');
-      // Always fetch the latest fee right before the customer fills the form
       await loadLiveFee();
-      // Update the fee display on the order form
       const e1 = document.getElementById('txt-inside-fee'); if (e1) e1.textContent = `Fixed fee — ₦${INSIDE_FEE}`;
-      showPage('order');
+      const e2 = document.getElementById('fo-txt-inside-fee'); if (e2) e2.textContent = `Fixed fee — ₦${INSIDE_FEE}`;
+      const e3 = document.getElementById('er-txt-inside-fee'); if (e3) e3.textContent = `Fixed fee — ₦${INSIDE_FEE}`;
+      // Pre-fill food order + errand forms from profile
+      if (_profile) {
+        const fn = document.getElementById('fo-name'); if (fn && !fn.value) fn.value = _profile.full_name || '';
+        const fp = document.getElementById('fo-phone'); if (fp && !fp.value) fp.value = _profile.phone || '';
+        const en = document.getElementById('er-name'); if (en && !en.value) en.value = _profile.full_name || '';
+        const ep = document.getElementById('er-phone'); if (ep && !ep.value) ep.value = _profile.phone || '';
+        if (_profile.saved_address) {
+          document.getElementById('fo-addr-selection-wrap').style.display = 'block';
+          document.getElementById('fo-dropoff').value = _profile.saved_address;
+        }
+      }
+      await loadEateries();
+      showPage('dtype');
     }
     function tncDisagree() {
       document.getElementById('tnc-modal').classList.remove('open');
@@ -3511,6 +3833,214 @@
     }
 
     //  DELIVERY TYPE & CATEGORY
+    // ── DELIVERY TYPE PICKER ──
+    let globalDeliveryMode = 'delivery'; // 'delivery' | 'food' | 'errand'
+    let foDeliveryType = 'inside';
+    let erDeliveryType = 'inside';
+    let foItemsTotal = 0;
+    let eateries = [];
+
+    function selectDeliveryType(mode) {
+      globalDeliveryMode = mode;
+      if (mode === 'delivery') showPage('order');
+      else if (mode === 'food') showPage('food-order');
+      else if (mode === 'errand') showPage('errand');
+    }
+
+    // ── EATERIES ──
+    async function loadEateries() {
+      if (!_supaClient) return;
+      const loadEl = document.getElementById('eatery-loading');
+      const sel = document.getElementById('fo-eatery');
+      try {
+        const { data, error } = await _supaClient
+          .from('eateries')
+          .select('id, name, category')
+          .eq('active', true)
+          .order('name');
+        if (error) throw error;
+        eateries = data || [];
+        sel.innerHTML = '<option value="">-- Choose an eatery --</option>';
+        eateries.forEach(e => {
+          const opt = document.createElement('option');
+          opt.value = e.id;
+          opt.textContent = e.category ? `${e.name} (${e.category})` : e.name;
+          sel.appendChild(opt);
+        });
+        if (loadEl) loadEl.style.display = 'none';
+        sel.style.display = 'block';
+      } catch (err) {
+        if (loadEl) loadEl.textContent = 'Could not load eateries. Please try again.';
+        console.error('loadEateries error:', err);
+      }
+    }
+
+    // ── FOOD ORDER FORM ──
+    function foSelectType(t) {
+      foDeliveryType = t;
+      document.getElementById('fo-opt-inside').classList.toggle('selected', t === 'inside');
+      document.getElementById('fo-opt-outside').classList.toggle('selected', t === 'outside');
+      document.getElementById('fo-outside-notice').classList.toggle('hidden', t !== 'outside');
+    }
+    function foUseSavedAddr() {
+      document.getElementById('fo-addr-opt-home').classList.add('active');
+      document.getElementById('fo-addr-opt-change').classList.remove('active');
+      if (_profile?.saved_address) document.getElementById('fo-dropoff').value = _profile.saved_address;
+    }
+    function foChangeAddr() {
+      document.getElementById('fo-addr-opt-home').classList.remove('active');
+      document.getElementById('fo-addr-opt-change').classList.add('active');
+      document.getElementById('fo-dropoff').focus();
+    }
+    function addFoItem() {
+      const cont = document.getElementById('fo-items-container');
+      const row = document.createElement('div');
+      row.className = 'food-item-row';
+      row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px';
+      row.innerHTML = `
+        <input type="text" class="fo-item-name" placeholder="Item name" style="flex:2" />
+        <input type="number" class="fo-item-qty" placeholder="Qty" style="flex:1" min="1" oninput="calcFoTotal()" />
+        <input type="number" class="fo-item-price" placeholder="Price (₦)" style="flex:1" min="0" oninput="calcFoTotal()" />
+        <button onclick="this.parentElement.remove();calcFoTotal()" style="background:var(--red-dim);border:1px solid var(--red-border);color:var(--red);border-radius:6px;padding:0 10px;cursor:pointer;font-size:16px">✕</button>
+      `;
+      cont.appendChild(row);
+    }
+    function calcFoTotal() {
+      foItemsTotal = 0;
+      document.querySelectorAll('.fo-item-qty').forEach((q, i) => {
+        const p = document.querySelectorAll('.fo-item-price')[i];
+        foItemsTotal += (parseFloat(q.value) || 0) * (parseFloat(p?.value) || 0);
+      });
+      document.getElementById('fo-total-display').textContent = `Items Total: ₦${foItemsTotal}`;
+    }
+    function showFoErr(id, show) { document.getElementById(id).style.display = show ? 'block' : 'none'; }
+    async function submitFoodOrder() {
+      const btn = document.querySelector('#food-order .btn-full');
+      let valid = true;
+      const name = document.getElementById('fo-name').value.trim();
+      const phone = document.getElementById('fo-phone').value.trim();
+      const eateryId = document.getElementById('fo-eatery').value;
+      const dropoff = document.getElementById('fo-dropoff').value.trim();
+      showFoErr('fo-err-name', !name); if (!name) valid = false;
+      showFoErr('fo-err-phone', phone.length < 8); if (phone.length < 8) valid = false;
+      showFoErr('fo-err-eatery', !eateryId); if (!eateryId) valid = false;
+      showFoErr('fo-err-dropoff', !dropoff); if (!dropoff) valid = false;
+      // Validate items
+      const names = document.querySelectorAll('.fo-item-name');
+      const qtys = document.querySelectorAll('.fo-item-qty');
+      const prices = document.querySelectorAll('.fo-item-price');
+      let hasItem = false;
+      names.forEach((n, i) => { if (n.value.trim() && qtys[i]?.value > 0 && prices[i]?.value >= 0) hasItem = true; });
+      showFoErr('fo-err-items', !hasItem); if (!hasItem) valid = false;
+      if (!valid) return;
+
+      btn.textContent = 'SAVING ORDER…'; btn.disabled = true;
+      await loadLiveFee();
+
+      const eateryObj = eateries.find(e => String(e.id) === String(eateryId));
+      const eateryName = eateryObj ? eateryObj.name : 'Unknown Eatery';
+      let itemsArr = [];
+      names.forEach((n, i) => {
+        if (n.value.trim() && qtys[i]?.value > 0) {
+          itemsArr.push(`${n.value.trim()} x${qtys[i].value} @ ₦${prices[i]?.value || 0}`);
+        }
+      });
+      calcFoTotal();
+      const itemDesc = `[FOOD from ${eateryName}] ${itemsArr.join(', ')} | Items Total: ₦${foItemsTotal}`;
+      const fee = foDeliveryType === 'inside' ? `₦${INSIDE_FEE + foItemsTotal}` : 'Via WhatsApp';
+      const ordNum = String(Math.floor(100000 + Math.random() * 900000));
+
+      try {
+        const insertData = {
+          name, phone,
+          item: itemDesc,
+          pickup: eateryName,
+          dropoff,
+          type: foDeliveryType,
+          fee,
+          time: new Date().toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' }),
+          order_number: ordNum,
+          status: 'pending',
+          user_id: _user?.id || null
+        };
+        const { data: ord, error } = _supaClient ? await _supaClient.from('orders').insert([insertData]).select().single() : { data: { id: Date.now(), ...insertData }, error: null };
+        if (error) throw error;
+        currentOrder = { ...insertData, id: ord.id, order_number: ordNum };
+        globalDeliveryMode = 'food';
+        buildSummary();
+        showPage('summary');
+      } catch (err) {
+        alert('Error saving order. Please try again.');
+        console.error(err);
+      } finally {
+        btn.textContent = 'REVIEW ORDER →'; btn.disabled = false;
+      }
+    }
+
+    // ── ERRAND FORM ──
+    function erSelectType(t) {
+      erDeliveryType = t;
+      document.getElementById('er-opt-inside').classList.toggle('selected', t === 'inside');
+      document.getElementById('er-opt-outside').classList.toggle('selected', t === 'outside');
+      document.getElementById('er-outside-notice').classList.toggle('hidden', t !== 'outside');
+    }
+    function showErErr(id, show) { document.getElementById(id).style.display = show ? 'block' : 'none'; }
+    async function submitErrand() {
+      const btn = document.querySelector('#errand .btn-full');
+      let valid = true;
+      const name = document.getElementById('er-name').value.trim();
+      const phone = document.getElementById('er-phone').value.trim();
+      const task = document.getElementById('er-task').value.trim();
+      const pickup = document.getElementById('er-pickup').value.trim();
+      const dropoff = document.getElementById('er-dropoff').value.trim();
+      showErErr('er-err-name', !name); if (!name) valid = false;
+      showErErr('er-err-phone', phone.length < 8); if (phone.length < 8) valid = false;
+      showErErr('er-err-task', !task); if (!task) valid = false;
+      showErErr('er-err-pickup', !pickup); if (!pickup) valid = false;
+      showErErr('er-err-dropoff', !dropoff); if (!dropoff) valid = false;
+      if (!valid) return;
+
+      btn.textContent = 'SAVING ORDER…'; btn.disabled = true;
+      await loadLiveFee();
+      const fee = erDeliveryType === 'inside' ? `₦${INSIDE_FEE}` : 'Via WhatsApp';
+      const ordNum = String(Math.floor(100000 + Math.random() * 900000));
+
+      try {
+        const insertData = {
+          name, phone,
+          item: `[ERRAND] ${task}`,
+          pickup, dropoff,
+          type: erDeliveryType,
+          fee,
+          time: new Date().toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' }),
+          order_number: ordNum,
+          status: 'pending',
+          user_id: _user?.id || null
+        };
+        const { data: ord, error } = _supaClient ? await _supaClient.from('orders').insert([insertData]).select().single() : { data: { id: Date.now(), ...insertData }, error: null };
+        if (error) throw error;
+        currentOrder = { ...insertData, id: ord.id, order_number: ordNum };
+        globalDeliveryMode = 'errand';
+        buildSummary();
+        showPage('summary');
+      } catch (err) {
+        alert('Error saving order. Please try again.');
+        console.error(err);
+      } finally {
+        btn.textContent = 'REVIEW ORDER →'; btn.disabled = false;
+      }
+    }
+
+    // ── GOOGLE AUTH ──
+    async function handleGoogleAuth() {
+      if (!_supaClient) { alert('Authentication not available. Please check your setup.'); return; }
+      const { error } = await _supaClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin }
+      });
+      if (error) alert('Google sign-in failed: ' + error.message);
+    }
+
     function selectType(t) {
       deliveryType = t;
       document.getElementById('opt-inside').classList.toggle('selected', t === 'inside');
@@ -3519,11 +4049,7 @@
     }
 
     function selectCat(c) {
-      orderCategory = c;
-      document.getElementById('cat-food').classList.toggle('selected', c === 'food');
-      document.getElementById('cat-other').classList.toggle('selected', c === 'other');
-      document.getElementById('sect-food').classList.toggle('hidden', c !== 'food');
-      document.getElementById('sect-other').classList.toggle('hidden', c !== 'other');
+      // Logic removed as category selection is no longer in the Package Delivery form.
     }
 
     function addFoodItem() {
@@ -3571,33 +4097,8 @@
       let itemDesc = '';
       let iValid = true;
 
-      if (orderCategory === 'food') {
-        const names = document.querySelectorAll('.f-food-name');
-        const qtys = document.querySelectorAll('.f-food-qty');
-        const prices = document.querySelectorAll('.f-food-price');
-        let validItemsCount = 0;
-        let itemsArr = [];
-        
-        for (let k = 0; k < names.length; k++) {
-          let name = names[k].value.trim();
-          let qty = parseInt(qtys[k].value) || 0;
-          let price = parseInt(prices[k].value) || 0;
-          if (name && qty > 0 && price >= 0) {
-             validItemsCount++;
-             itemsArr.push(`${qty}x ${name} (₦${price * qty})`);
-          }
-        }
-        
-        if (validItemsCount === 0) {
-           iValid = false;
-        } else {
-           itemDesc = itemsArr.join(', ') + `\n[Items Total: ₦${foodItemsTotal}]`;
-        }
-        document.getElementById('err-food').style.display = iValid ? 'none' : 'block';
-      } else {
-        iValid = val('f-item', 'err-item', v => v.length > 3);
-        itemDesc = document.getElementById('f-item').value.trim();
-      }
+      iValid = val('f-item', 'err-item', v => v.length > 3);
+      itemDesc = document.getElementById('f-item').value.trim();
 
       if (!n || !p || !iValid || !pu || !dr) return;
 
@@ -3626,7 +4127,7 @@
         pickup: document.getElementById('f-pickup').value.trim(),
         dropoff: document.getElementById('f-dropoff').value.trim(),
         type: deliveryType,
-        fee: deliveryType === 'inside' ? (orderCategory === 'food' ? `₦${INSIDE_FEE + foodItemsTotal}` : `₦${INSIDE_FEE}`) : 'Via WhatsApp',
+        fee: deliveryType === 'inside' ? `₦${INSIDE_FEE}` : 'Via WhatsApp',
         time: timeStr,
         status: 'pending',
         order_number: currentOrder && currentOrder.order_number ? currentOrder.order_number : generateOrderNumber()
@@ -3652,29 +4153,40 @@
         return;
       }
 
+      buildSummary();
+      if (btn) { btn.disabled = false; btn.textContent = 'REVIEW ORDER →'; }
+    }
+
+    function buildSummary() {
+      if (!currentOrder || !currentOrder.id) return;
+      
       const sid = currentOrder.order_number || fmtId(currentOrder.id);
       document.getElementById('sum-id').textContent = sid;
-      document.getElementById('sum-time').textContent = timeStr;
+      document.getElementById('sum-time').textContent = currentOrder.time || '';
       document.getElementById('sum-name').textContent = currentOrder.name;
       document.getElementById('sum-phone').textContent = currentOrder.phone;
       document.getElementById('sum-item').textContent = currentOrder.item;
       document.getElementById('sum-pickup').textContent = currentOrder.pickup;
       document.getElementById('sum-dropoff').textContent = currentOrder.dropoff;
-      document.getElementById('sum-type').textContent = deliveryType === 'inside' ? 'Inside Campus' : 'Outside Campus';
+
+      const activeType = currentOrder.type || deliveryType;
+      document.getElementById('sum-type').textContent = activeType === 'inside' ? 'Inside Campus' : 'Outside Campus';
 
       const feeEl = document.getElementById('sum-fee');
       const rowFood = document.getElementById('row-food-total');
       const foodTotalEl = document.getElementById('sum-food-total');
       const deliveryFeeEl = document.getElementById('sum-delivery-fee');
 
-      if (deliveryType === 'inside') {
+      if (activeType === 'inside') {
         feeEl.className = 'sum-val big';
-        if (orderCategory === 'food') {
+        
+        if (globalDeliveryMode === 'food') {
           rowFood.classList.remove('hidden');
-          foodTotalEl.textContent = `₦${foodItemsTotal}`;
+          foodTotalEl.textContent = `₦${foItemsTotal}`;
           deliveryFeeEl.textContent = `₦${INSIDE_FEE}`;
-          feeEl.textContent = `₦${INSIDE_FEE + foodItemsTotal}`;
+          feeEl.textContent = `₦${INSIDE_FEE + foItemsTotal}`;
         } else {
+          // Standard package delivery or errand (fixed fee)
           rowFood.classList.add('hidden');
           deliveryFeeEl.textContent = `₦${INSIDE_FEE}`;
           feeEl.textContent = `₦${INSIDE_FEE}`;
@@ -3686,7 +4198,6 @@
         feeEl.textContent = 'Will be sent via WhatsApp before payment';
       }
 
-      if (btn) { btn.disabled = false; btn.textContent = 'REVIEW ORDER →'; }
       showPage('summary');
     }
 
@@ -4205,6 +4716,100 @@
     // Auto slide for continuous animation
     setInterval(() => { changeRev(1); }, 4000);
 
+    // ── Review Modal ──────────────────────────────────────
+    let _reviewStar = 0;
+
+    function openReviewModal() {
+      _reviewStar = 0;
+      document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('lit'));
+      document.getElementById('review-text-input').value = '';
+      document.getElementById('review-name-input').value = (_profile && _profile.name) ? _profile.name : '';
+      document.getElementById('review-modal').classList.add('open');
+    }
+
+    function closeReviewModal() {
+      document.getElementById('review-modal').classList.remove('open');
+    }
+
+    function setReviewStar(val) {
+      _reviewStar = val;
+      document.querySelectorAll('.star-btn').forEach(b => {
+        b.classList.toggle('lit', parseInt(b.dataset.val) <= val);
+      });
+    }
+
+    async function submitReview() {
+      const text = document.getElementById('review-text-input').value.trim();
+      const name = document.getElementById('review-name-input').value.trim() || 'Anonymous';
+      if (!_reviewStar) { alert('Please select a star rating first.'); return; }
+      if (text.length < 10) { alert('Please write a slightly longer review (at least 10 characters).'); return; }
+
+      const btn = document.getElementById('btn-submit-review');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      try {
+        if (_supaClient) {
+          const { error } = await _supaClient.from('reviews').insert({
+            name,
+            rating: _reviewStar,
+            text,
+            user_id: _user ? _user.id : null,
+            created_at: new Date().toISOString()
+          });
+          if (error) console.warn('Review DB error:', error.message);
+        }
+
+        // Inject new card into slider immediately
+        const track = document.getElementById('rev-track');
+        const initials = name.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().slice(0, 2) || '??';
+        const colors = ['#0F766E','#B45309','#1D4ED8','#6B21A8','#059669','#DC2626','#0369A1'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const stars = '★'.repeat(_reviewStar) + '☆'.repeat(5 - _reviewStar);
+
+        const card = document.createElement('div');
+        card.className = 'rev-card';
+        card.innerHTML = `
+          <div class="quote-icon">"</div>
+          <p class="rev-text" style="margin-bottom:12px;">"${text}"</p>
+          <div style="font-size:14px;color:#F59E0B;letter-spacing:2px;margin-bottom:16px;">${stars}</div>
+          <div class="rev-author">
+            <div class="r-avatar" style="background:${color}">${initials}</div>
+            <div>
+              <div class="r-name">${name}</div>
+              <div class="r-sub">Student • LAUTECH</div>
+            </div>
+          </div>`;
+        track.appendChild(card);
+
+        // Add a dot for the new card
+        const dotsContainer = document.querySelector('.rev-dots');
+        if (dotsContainer) {
+          const dot = document.createElement('span');
+          dot.className = 'rdot';
+          const newIdx = dotsContainer.children.length;
+          dot.onclick = () => goToRev(newIdx);
+          dotsContainer.appendChild(dot);
+        }
+
+        closeReviewModal();
+        setTimeout(updateReviews, 100);
+        alert('Thanks for your review! 🎉 It\'s now showing on the page.');
+      } catch (e) {
+        console.error(e);
+        closeReviewModal();
+        alert('Review submitted — thanks for the feedback!');
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'SUBMIT REVIEW';
+    }
+
+    // Close review modal when clicking outside the box
+    document.getElementById('review-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeReviewModal();
+    });
+
   </script>
   <!--  TRACK ORDER PAGE  -->
   <div id="track" class="page">
@@ -4377,6 +4982,27 @@
       <div class="modal-footer">
         <button class="modal-btn-disagree" onclick="tncDisagree()">DISAGREE</button>
         <button class="modal-btn-agree" onclick="tncAgree()">I AGREE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEW MODAL -->
+  <div class="review-modal-overlay" id="review-modal">
+    <div class="review-modal-box">
+      <div class="review-modal-title">⭐ LEAVE A REVIEW</div>
+      <div class="review-modal-sub">How was your SwiftXpress experience? Your feedback helps us improve.</div>
+      <div class="star-row" id="star-row">
+        <button class="star-btn" data-val="1" onclick="setReviewStar(1)">★</button>
+        <button class="star-btn" data-val="2" onclick="setReviewStar(2)">★</button>
+        <button class="star-btn" data-val="3" onclick="setReviewStar(3)">★</button>
+        <button class="star-btn" data-val="4" onclick="setReviewStar(4)">★</button>
+        <button class="star-btn" data-val="5" onclick="setReviewStar(5)">★</button>
+      </div>
+      <input class="review-name-input" id="review-name-input" type="text" placeholder="Your name (e.g. David A.)" maxlength="40" />
+      <textarea class="review-textarea" id="review-text-input" placeholder="Tell us about your experience — delivery speed, rider, payment, etc." maxlength="300"></textarea>
+      <div class="review-modal-actions">
+        <button class="btn-cancel-review" onclick="closeReviewModal()">Cancel</button>
+        <button class="btn-submit-review" id="btn-submit-review" onclick="submitReview()">SUBMIT REVIEW</button>
       </div>
     </div>
   </div>
