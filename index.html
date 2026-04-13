@@ -2752,9 +2752,9 @@
     <div class="dtype-page">
       <div class="dtype-grid">
         <div class="dtype-card" onclick="selectDeliveryType('delivery')">
-          <div class="dtype-icon">🚚</div>
-          <div class="dtype-name">Delivery</div>
-          <div class="dtype-desc">Send packages or goods anywhere on or off campus</div>
+          <div class="dtype-icon">📦</div>
+          <div class="dtype-name">Package Delivery</div>
+          <div class="dtype-desc">Papers, bags, laundry or any item moved for you</div>
         </div>
         <div class="dtype-card" onclick="selectDeliveryType('food')">
           <div class="dtype-icon">🍔</div>
@@ -2988,42 +2988,12 @@
             <div class="err" id="err-phone">Enter a valid phone number</div>
           </div>
         </div>
-        <div class="field">
-          <label>Category</label>
-          <div class="type-grid">
-            <div class="type-opt selected" id="cat-food" onclick="selectCat('food')">
-              <div class="type-name">Food</div>
-              <div class="type-fee">Structured items</div>
-            </div>
-            <div class="type-opt" id="cat-other" onclick="selectCat('other')">
-              <div class="type-name">Other Services</div>
-              <div class="type-fee">Goods, errands, etc.</div>
-            </div>
-          </div>
-        </div>
-
-        <div id="sect-food">
+        <div id="sect-other">
           <div class="field">
-            <label>What do you want to get?</label>
-            <div id="food-items-container">
-               <div class="food-item-row" style="display:flex;gap:8px;margin-bottom:8px">
-                 <input type="text" class="f-food-name" placeholder="Item name" style="flex:2" />
-                 <input type="number" class="f-food-qty" placeholder="Qty" style="flex:1" min="1" oninput="calcFoodTotal()" />
-                 <input type="number" class="f-food-price" placeholder="Price (₦)" style="flex:1" min="0" oninput="calcFoodTotal()" />
-               </div>
-            </div>
-            <button class="btn-outline-red" style="margin-top:8px;font-size:12px;padding:8px 16px;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500" onclick="addFoodItem()">+ Add another item</button>
-            <div style="margin-top:12px;font-size:14px;color:var(--white);font-weight:500" id="food-total-display">Items Total: ₦0</div>
-            <div class="err" id="err-food">Please add at least one valid item with name, quantity, and price.</div>
-          </div>
-        </div>
-
-        <div id="sect-other" class="hidden">
-          <div class="field">
-            <label>What do you want?</label>
+            <label>What do you want to deliver?</label>
             <textarea id="f-item"
-              placeholder="Describe exactly what you want — e.g. Picking up my clothes from the dry cleaner..."></textarea>
-            <div class="err" id="err-item">Please describe your order</div>
+              placeholder="e.g. My laundry bag from Moremi to Jaja Hall, or a textbook to Faculty of Engineering..."></textarea>
+            <div class="err" id="err-item">Please describe the items to be delivered</div>
           </div>
         </div>
         <div class="row2">
@@ -4002,11 +3972,7 @@
     }
 
     function selectCat(c) {
-      orderCategory = c;
-      document.getElementById('cat-food').classList.toggle('selected', c === 'food');
-      document.getElementById('cat-other').classList.toggle('selected', c === 'other');
-      document.getElementById('sect-food').classList.toggle('hidden', c !== 'food');
-      document.getElementById('sect-other').classList.toggle('hidden', c !== 'other');
+      // Logic removed as category selection is no longer in the Package Delivery form.
     }
 
     function addFoodItem() {
@@ -4054,33 +4020,8 @@
       let itemDesc = '';
       let iValid = true;
 
-      if (orderCategory === 'food') {
-        const names = document.querySelectorAll('.f-food-name');
-        const qtys = document.querySelectorAll('.f-food-qty');
-        const prices = document.querySelectorAll('.f-food-price');
-        let validItemsCount = 0;
-        let itemsArr = [];
-        
-        for (let k = 0; k < names.length; k++) {
-          let name = names[k].value.trim();
-          let qty = parseInt(qtys[k].value) || 0;
-          let price = parseInt(prices[k].value) || 0;
-          if (name && qty > 0 && price >= 0) {
-             validItemsCount++;
-             itemsArr.push(`${qty}x ${name} (₦${price * qty})`);
-          }
-        }
-        
-        if (validItemsCount === 0) {
-           iValid = false;
-        } else {
-           itemDesc = itemsArr.join(', ') + `\n[Items Total: ₦${foodItemsTotal}]`;
-        }
-        document.getElementById('err-food').style.display = iValid ? 'none' : 'block';
-      } else {
-        iValid = val('f-item', 'err-item', v => v.length > 3);
-        itemDesc = document.getElementById('f-item').value.trim();
-      }
+      iValid = val('f-item', 'err-item', v => v.length > 3);
+      itemDesc = document.getElementById('f-item').value.trim();
 
       if (!n || !p || !iValid || !pu || !dr) return;
 
@@ -4109,7 +4050,7 @@
         pickup: document.getElementById('f-pickup').value.trim(),
         dropoff: document.getElementById('f-dropoff').value.trim(),
         type: deliveryType,
-        fee: deliveryType === 'inside' ? (orderCategory === 'food' ? `₦${INSIDE_FEE + foodItemsTotal}` : `₦${INSIDE_FEE}`) : 'Via WhatsApp',
+        fee: deliveryType === 'inside' ? `₦${INSIDE_FEE}` : 'Via WhatsApp',
         time: timeStr,
         status: 'pending',
         order_number: currentOrder && currentOrder.order_number ? currentOrder.order_number : generateOrderNumber()
@@ -4135,16 +4076,22 @@
         return;
       }
 
+      buildSummary();
+      if (btn) { btn.disabled = false; btn.textContent = 'REVIEW ORDER →'; }
+    }
+
+    function buildSummary() {
+      if (!currentOrder || !currentOrder.id) return;
+      
       const sid = currentOrder.order_number || fmtId(currentOrder.id);
       document.getElementById('sum-id').textContent = sid;
-      document.getElementById('sum-time').textContent = timeStr;
+      document.getElementById('sum-time').textContent = currentOrder.time || '';
       document.getElementById('sum-name').textContent = currentOrder.name;
       document.getElementById('sum-phone').textContent = currentOrder.phone;
       document.getElementById('sum-item').textContent = currentOrder.item;
       document.getElementById('sum-pickup').textContent = currentOrder.pickup;
       document.getElementById('sum-dropoff').textContent = currentOrder.dropoff;
 
-      // Resolve delivery type from current order or active form
       const activeType = currentOrder.type || deliveryType;
       document.getElementById('sum-type').textContent = activeType === 'inside' ? 'Inside Campus' : 'Outside Campus';
 
@@ -4155,17 +4102,14 @@
 
       if (activeType === 'inside') {
         feeEl.className = 'sum-val big';
+        
         if (globalDeliveryMode === 'food') {
           rowFood.classList.remove('hidden');
           foodTotalEl.textContent = `₦${foItemsTotal}`;
           deliveryFeeEl.textContent = `₦${INSIDE_FEE}`;
           feeEl.textContent = `₦${INSIDE_FEE + foItemsTotal}`;
-        } else if (globalDeliveryMode === 'delivery' && orderCategory === 'food') {
-          rowFood.classList.remove('hidden');
-          foodTotalEl.textContent = `₦${foodItemsTotal}`;
-          deliveryFeeEl.textContent = `₦${INSIDE_FEE}`;
-          feeEl.textContent = `₦${INSIDE_FEE + foodItemsTotal}`;
         } else {
+          // Standard package delivery or errand (fixed fee)
           rowFood.classList.add('hidden');
           deliveryFeeEl.textContent = `₦${INSIDE_FEE}`;
           feeEl.textContent = `₦${INSIDE_FEE}`;
@@ -4177,7 +4121,6 @@
         feeEl.textContent = 'Will be sent via WhatsApp before payment';
       }
 
-      if (btn) { btn.disabled = false; btn.textContent = 'REVIEW ORDER →'; }
       showPage('summary');
     }
 
