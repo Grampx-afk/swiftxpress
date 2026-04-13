@@ -1254,6 +1254,71 @@
       border-radius: 20px
     }
 
+    /* ── Homepage Eateries ── */
+    .home-eateries {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 24px 64px;
+    }
+
+    .e-scroll {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding: 20px 0;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .e-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .e-item {
+      flex: 0 0 160px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 16px;
+      text-align: center;
+      transition: all .3s ease;
+      cursor: pointer;
+    }
+
+    .e-item:hover {
+      border-color: var(--red-border);
+      transform: translateY(-5px);
+      background: var(--surface);
+    }
+
+    .e-item .icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+      width: 50px;
+      height: 50px;
+      background: var(--red-dim);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+    }
+
+    .e-item .name {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--white);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .e-item .cat {
+      font-size: 10px;
+      color: var(--gray);
+      letter-spacing: 1px;
+    }
+
     .hero-cta {
       display: flex;
       gap: 12px;
@@ -1357,7 +1422,19 @@
       line-height: 1.55
     }
 
-    /* WHAT WE DELIVER */
+    .home-eateries {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 24px 64px;
+    }
+
+    .home-eateries .sec-title {
+        text-align: center;
+    }
+
+    .home-eateries .sec-label {
+        text-align: center;
+    }
     .what {
       max-width: 700px;
       margin: 0 auto;
@@ -3811,6 +3888,14 @@
       </div>
     </div>
 
+    <div class="home-eateries">
+      <div class="sec-label">Our Partners</div>
+      <div class="sec-title">POPULAR EATERIES</div>
+      <div id="home-eatery-list" class="e-scroll">
+        <div style="color:var(--gray);font-size:12px;width:100%;text-align:center;">Loading available eateries...</div>
+      </div>
+    </div>
+
   </div>
 
   <!--  ORDER FORM  -->
@@ -3883,24 +3968,21 @@
           </div>
         </div>
         <div class="field">
-          <label>Select Eatery / Supermarket</label>
-          <div id="fo-eatery-trigger" class="eatery-trigger" onclick="toggleEateryPicker()">
-            <span id="fo-eatery-display" class="eatery-trigger-placeholder">-- Choose an eatery --</span>
-            <span class="chevron">❯</span>
-          </div>
+          <label>Choose Eatery / Supermarket</label>
           <input type="hidden" id="fo-eatery" value="">
           
-          <div id="eatery-picker" class="picker-container">
-            <div class="picker-search-wrap">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              <input type="text" id="fo-eatery-search" placeholder="Search for eatery..." oninput="filterEateries(this.value)">
-            </div>
-            <p class="eatery-loading" id="eatery-loading">Loading eateries…</p>
+          <div class="picker-search-wrap" style="margin-top:8px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="fo-eatery-search" placeholder="Search for eatery..." oninput="filterEateries(this.value)">
+          </div>
+
+          <div id="eatery-picker" class="picker-container open" style="display:block;margin-top:0">
+            <p class="eatery-loading" id="eatery-loading">Loading eateries from database…</p>
             <div id="eatery-grid" class="eatery-grid">
                <!-- Eatery cards injected here -->
             </div>
           </div>
-          <div class="err" id="fo-err-eatery">Please select an eatery</div>
+          <div class="err" id="fo-err-eatery">Please select an eatery from the list</div>
         </div>
         <div class="field">
           <label>What do you want to order?</label>
@@ -4903,22 +4985,6 @@
     }
 
     // ── EATERIES ──
-    function toggleEateryPicker() {
-      const p = document.getElementById('eatery-picker');
-      const t = document.getElementById('fo-eatery-trigger');
-      const isOpen = p.classList.contains('open');
-      
-      if (!isOpen) {
-        p.classList.add('open');
-        t.classList.add('open');
-        document.getElementById('fo-eatery-search').focus();
-        renderEateries();
-      } else {
-        p.classList.remove('open');
-        t.classList.remove('open');
-      }
-    }
-
     async function loadEateries() {
       if (!_supaClient) return;
       try {
@@ -4930,6 +4996,7 @@
         if (error) throw error;
         eateries = data || [];
         renderEateries();
+        renderHomeEateries();
       } catch (err) {
         const loadEl = document.getElementById('eatery-loading');
         if (loadEl) loadEl.textContent = 'Could not load eateries. Please try again.';
@@ -4960,13 +5027,46 @@
         const icon = getEateryIcon(e.category);
         const isSelected = String(e.id) === String(selectedId);
         return `
-          <div class="eatery-card ${isSelected ? 'selected' : ''}" onclick="selectEatery('${e.id}', '${e.name.replace(/'/g, "\\'")}')">
+          <div class="eatery-card ${isSelected ? 'selected' : ''}" onclick="selectEatery('${e.id}')">
             <div class="e-icon">${icon}</div>
             <div class="e-name">${e.name}</div>
             <div class="e-cat">${e.category || 'Vendor'}</div>
           </div>
         `;
       }).join('');
+    }
+
+    function renderHomeEateries() {
+        const list = document.getElementById('home-eatery-list');
+        if (!list) return;
+        if (eateries.length === 0) {
+            list.innerHTML = `<div style="color:var(--gray);font-size:12px;width:100%;text-align:center;">No eateries active at the moment.</div>`;
+            return;
+        }
+        list.innerHTML = eateries.map(e => {
+            const icon = getEateryIcon(e.category);
+            return `
+                <div class="e-item" onclick="startOrderFromHome('${e.id}')">
+                    <div class="icon">${icon}</div>
+                    <div class="name">${e.name}</div>
+                    <div class="cat">${e.category || 'Vendor'}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function startOrderFromHome(eateryId) {
+        if (!_user) {
+            alert('Kindly sign in to place an order.');
+            showAuth('login');
+            return;
+        }
+        document.getElementById('fo-eatery').value = eateryId;
+        // Proceed to agreement or directly to food order
+        tncAgree().then(() => {
+            selectDeliveryType('food');
+            renderEateries(); // highlight the one selected
+        });
     }
 
     function getEateryIcon(cat) {
@@ -4985,21 +5085,16 @@
       renderEateries(val);
     }
 
-    function selectEatery(id, name) {
+    function selectEatery(id) {
       document.getElementById('fo-eatery').value = id;
-      const display = document.getElementById('fo-eatery-display');
-      display.textContent = name;
-      display.classList.remove('eatery-trigger-placeholder');
-      display.classList.add('eatery-trigger-val');
-      
-      toggleEateryPicker(); // close it
-      
       // Update cards UI
-      document.querySelectorAll('.eatery-card').forEach(c => c.classList.remove('selected'));
-      // The render call in toggleEateryPicker will handle it next time it opens
-      
+      document.querySelectorAll('.eatery-card').forEach(c => {
+          c.classList.toggle('selected', c.getAttribute('onclick').includes(`'${id}'`));
+      });
       showFoErr('fo-err-eatery', false);
     }
+
+    // Previous version had redundant function, keeping clean
 
     // ── FOOD ORDER FORM ──
     function foSelectType(t) {
