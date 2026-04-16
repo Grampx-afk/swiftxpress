@@ -279,6 +279,13 @@ let orders = [];
 let currentOrder = {};
 const gSettings = JSON.parse(localStorage.getItem('sxSettings') || '{}');
 let INSIDE_FEE = gSettings['s-fee'] ? parseInt(gSettings['s-fee']) : 700; // Use 700 as safe default
+// Immediately render cached/default fee so placeholder never shows
+document.addEventListener('DOMContentLoaded', () => {
+  const _fee = INSIDE_FEE;
+  ['txt-inside-fee', 'fo-txt-inside-fee', 'er-txt-inside-fee'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = `Fixed fee — ₦${_fee}`;
+  });
+});
 let deliveryType = 'inside';
 let orderCategory = 'food';
 let foodItemsTotal = 0;
