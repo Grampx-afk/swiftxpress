@@ -508,15 +508,15 @@ function startOrderFromHome(eateryId) {
 }
 
 function getEateryIcon(cat) {
-  if (!cat) return 'ðŸ´';
+  if (!cat) return '🍴';
   const c = cat.toLowerCase();
-  if (c.includes('canteen')) return 'ðŸ²';
-  if (c.includes('restaurant')) return 'ðŸ±';
-  if (c.includes('fast food')) return 'ðŸ”';
-  if (c.includes('supermarket') || c.includes('store')) return 'ðŸ›’';
-  if (c.includes('bakery')) return 'ðŸ¥';
-  if (c.includes('pharmacy')) return 'ðŸ’Š';
-  return 'ðŸ´';
+  if (c.includes('canteen')) return '🍲';
+  if (c.includes('restaurant')) return '🍱';
+  if (c.includes('fast food')) return '🍔';
+  if (c.includes('supermarket') || c.includes('store')) return '🛒';
+  if (c.includes('bakery')) return '🥐';
+  if (c.includes('pharmacy')) return '💊';
+  return '🍴';
 }
 
 function filterEateries(val) {
@@ -776,7 +776,7 @@ async function submitOrder() {
   }
 
   const now = new Date();
-  const timeStr = now.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' }) + ' Â· ' +
+  const timeStr = now.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' }) + ' • ' +
     now.toLocaleDateString('en-NG', { day: 'numeric', month: 'short' });
 
   const orderData = {
@@ -997,7 +997,7 @@ async function verifyAndConfirmPayment(reference) {
       currentOrder.status = 'paid';
       showSuccessReceipt(reference);
       const trackingUrl = `${window.location.origin}${window.location.pathname}?track=${currentOrder.order_number || fmtId(currentOrder.id)}`;
-      const msg = `Hi SwiftXpress! My payment is confirmed for Order #${currentOrder.order_number || fmtId(currentOrder.id)}.\n\nPaystack Ref: ${reference}\nName: ${currentOrder.name}\nPhone: ${currentOrder.phone}\nItem: ${currentOrder.item}\nPickup: ${currentOrder.pickup}\nDropoff: ${currentOrder.dropoff}\n\nðŸ“¦ Track my order live: ${trackingUrl}\n\nThank you!`;
+      const msg = `Hi SwiftXpress! My payment is confirmed for Order #${currentOrder.order_number || fmtId(currentOrder.id)}.\n\nPaystack Ref: ${reference}\nName: ${currentOrder.name}\nPhone: ${currentOrder.phone}\nItem: ${currentOrder.item}\nPickup: ${currentOrder.pickup}\nDropoff: ${currentOrder.dropoff}\n\n📦 Track my order live: ${trackingUrl}\n\nThank you!`;
       openWA(msg);
       startTracking(currentOrder.id);
     } else {
@@ -1442,7 +1442,7 @@ async function submitReview() {
     const initials = name.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().slice(0, 2) || '??';
     const colors = ['#0F766E', '#B45309', '#1D4ED8', '#6B21A8', '#059669', '#DC2626', '#0369A1'];
     const color = colors[Math.floor(Math.random() * colors.length)];
-    const stars = '☦'.repeat(_reviewStar) + '☠'.repeat(5 - _reviewStar);
+    const stars = '★'.repeat(_reviewStar) + '☆'.repeat(5 - _reviewStar);
 
     const card = document.createElement('div');
     card.className = 'rev-card';
@@ -1471,7 +1471,7 @@ async function submitReview() {
 
     closeReviewModal();
     setTimeout(updateReviews, 100);
-    alert('Thanks for your review! ðŸŽ‰ It\'s now showing on the page.');
+    alert('Thanks for your review! 🎉 It\'s now showing on the page.');
   } catch (e) {
     console.error(e);
     closeReviewModal();
