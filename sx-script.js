@@ -462,11 +462,9 @@ function renderEateries(filter = '') {
   const selectedId = document.getElementById('fo-eatery').value;
 
   grid.innerHTML = filtered.map(e => {
-    const icon = getEateryIcon(e.category);
     const isSelected = String(e.id) === String(selectedId);
     return `
           <div class="eatery-card ${isSelected ? 'selected' : ''}" onclick="selectEatery('${e.id}')">
-            <div class="e-icon">${icon}</div>
             <div class="e-name">${e.name}</div>
             <div class="e-cat">${e.category || 'Vendor'}</div>
           </div>
@@ -482,10 +480,8 @@ function renderHomeEateries() {
     return;
   }
   list.innerHTML = eateries.map(e => {
-    const icon = getEateryIcon(e.category);
     return `
                 <div class="e-item" onclick="startOrderFromHome('${e.id}')">
-                    <div class="icon">${icon}</div>
                     <div class="name">${e.name}</div>
                     <div class="cat">${e.category || 'Vendor'}</div>
                 </div>
@@ -507,17 +503,6 @@ function startOrderFromHome(eateryId) {
   });
 }
 
-function getEateryIcon(cat) {
-  if (!cat) return '🍴';
-  const c = cat.toLowerCase();
-  if (c.includes('canteen')) return '🍲';
-  if (c.includes('restaurant')) return '🍱';
-  if (c.includes('fast food')) return '🍔';
-  if (c.includes('supermarket') || c.includes('store')) return '🛒';
-  if (c.includes('bakery')) return '🥐';
-  if (c.includes('pharmacy')) return '💊';
-  return '🍴';
-}
 
 function filterEateries(val) {
   renderEateries(val);

@@ -919,23 +919,6 @@
       box-shadow: 0 0 0 1px var(--red);
     }
 
-    .e-icon {
-      font-size: 24px;
-      width: 44px;
-      height: 44px;
-      background: var(--card2);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: inherit;
-    }
-
-    .eatery-card:hover .e-icon {
-      background: var(--red);
-      color: #fff;
-    }
-
     .e-name {
       font-family: 'Rajdhani', sans-serif;
       font-weight: 700;
@@ -1289,19 +1272,6 @@
       border-color: var(--red-border);
       transform: translateY(-5px);
       background: var(--surface);
-    }
-
-    .e-item .icon {
-      font-size: 28px;
-      margin-bottom: 12px;
-      width: 50px;
-      height: 50px;
-      background: var(--red-dim);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 12px;
     }
 
     .e-item .name {
@@ -5261,11 +5231,9 @@ function renderEateries(filter = '') {
   const selectedId = document.getElementById('fo-eatery').value;
 
   grid.innerHTML = filtered.map(e => {
-    const icon = getEateryIcon(e.category);
     const isSelected = String(e.id) === String(selectedId);
     return `
           <div class="eatery-card ${isSelected ? 'selected' : ''}" onclick="selectEatery('${e.id}')">
-            <div class="e-icon">${icon}</div>
             <div class="e-name">${e.name}</div>
             <div class="e-cat">${e.category || 'Vendor'}</div>
           </div>
@@ -5281,10 +5249,8 @@ function renderHomeEateries() {
     return;
   }
   list.innerHTML = eateries.map(e => {
-    const icon = getEateryIcon(e.category);
     return `
                 <div class="e-item" onclick="startOrderFromHome('${e.id}')">
-                    <div class="icon">${icon}</div>
                     <div class="name">${e.name}</div>
                     <div class="cat">${e.category || 'Vendor'}</div>
                 </div>
@@ -5306,17 +5272,6 @@ function startOrderFromHome(eateryId) {
   });
 }
 
-function getEateryIcon(cat) {
-  if (!cat) return '🍴';
-  const c = cat.toLowerCase();
-  if (c.includes('canteen')) return '🍲';
-  if (c.includes('restaurant')) return '🍱';
-  if (c.includes('fast food')) return '🍔';
-  if (c.includes('supermarket') || c.includes('store')) return '🛒';
-  if (c.includes('bakery')) return '🥐';
-  if (c.includes('pharmacy')) return '💊';
-  return '🍴';
-}
 
 function filterEateries(val) {
   renderEateries(val);
