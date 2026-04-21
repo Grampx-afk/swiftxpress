@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -4921,6 +4921,24 @@ async function handleRegister(e) {
 async function handleLogout() {
   await _supaClient.auth.signOut();
   showPage('home');
+}
+
+// ── Google OAuth ──
+async function handleGoogleAuth() {
+  if (!_supaClient) {
+    alert('Authentication service is not available. Please check your setup.');
+    return;
+  }
+  // Use the current page origin so redirect works on both Vercel and localhost
+  const redirectTo = window.location.origin + window.location.pathname;
+  const { error } = await _supaClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: redirectTo }
+  });
+  if (error) {
+    alert('Google sign-in failed: ' + error.message);
+    console.error('Google OAuth error:', error);
+  }
 }
 
 async function fetchProfile() {
