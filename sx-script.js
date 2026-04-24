@@ -70,18 +70,58 @@ function updateAuthUI() {
 
 async function handleLogin(e) {
   e.preventDefault();
-  const email = document.getElementById('login-email').value;
-  const pass = document.getElementById('login-password').value;
+  const btn = e.target.querySelector('button[type="submit"]');
+  const emailInput = document.getElementById('login-email');
+  const passInput = document.getElementById('login-password');
+  const email = emailInput.value.trim();
+  const pass = passInput.value;
   const err = document.getElementById('login-err');
-  err.style.display = 'none';
+  
+  if (!email || !pass) return;
 
-  const { data, error } = await _supaClient.auth.signInWithPassword({ email, password: pass });
-  if (error) {
-    err.textContent = error.message;
+  err.style.display = 'none';
+  const originalText = btn.textContent;
+  btn.textContent = 'SIGNING IN...';
+  btn.disabled = true;
+
+  console.log('Login attempt for:', email);
+
+  await supabaseInit;
+  if (!_supaClient) {
+    console.error('Supabase client not initialized');
+    err.textContent = "Database connection error. Please try again.";
     err.style.display = 'block';
-  } else {
-    closeAuth();
-    showPage('home');
+    btn.textContent = originalText;
+    btn.disabled = false;
+    return;
+  }
+
+  try {
+    console.log('Calling signInWithPassword...');
+    const { data, error } = await _supaClient.auth.signInWithPassword({ email, password: pass });
+    
+    if (error) {
+      console.error('Login error:', error);
+      if (error.message.toLowerCase().includes('confirm')) {
+        err.textContent = "Please confirm your email address before signing in.";
+      } else if (error.message.toLowerCase().includes('invalid')) {
+        err.textContent = "Invalid email or password. Please try again.";
+      } else {
+        err.textContent = error.message;
+      }
+      err.style.display = 'block';
+    } else {
+      console.log('Login successful:', data.user);
+      closeAuth();
+      showPage('home');
+    }
+  } catch (ex) {
+    console.error('Login Exception:', ex);
+    err.textContent = "Connection error. Please check your internet.";
+    err.style.display = 'block';
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
   }
 }
 
@@ -95,6 +135,14 @@ async function handleRegister(e) {
   const err = document.getElementById('reg-err');
 
   err.style.display = 'none';
+
+  await supabaseInit;
+  if (!_supaClient) {
+    err.textContent = "Database connection error. Please try again.";
+    err.style.display = 'block';
+    return;
+  }
+
   const originalText = btn.textContent;
   btn.textContent = 'CREATING ACCOUNT...';
   btn.disabled = true;
@@ -112,10 +160,7 @@ async function handleRegister(e) {
       err.textContent = error.message;
       err.style.display = 'block';
     } else if (data.user) {
-      // Check if session is established (means confirmation is off)
       const session = data.session;
-
-      // Create profile record
       const { error: profError } = await _supaClient.from('profiles').insert([{
         id: data.user.id,
         full_name: name,
@@ -124,7 +169,6 @@ async function handleRegister(e) {
 
       if (profError) {
         console.error('Profile Creation Error:', profError);
-        // We don't block the user but notify them
       }
 
       if (!session) {
@@ -150,7 +194,10 @@ async function handleRegister(e) {
 }
 
 async function handleLogout() {
-  await _supaClient.auth.signOut();
+  await supabaseInit;
+  if (_supaClient) {
+    await _supaClient.auth.signOut();
+  }
   showPage('home');
 }
 
@@ -677,6 +724,7 @@ async function submitErrand() {
 
 // ── GOOGLE AUTH ──
 async function handleGoogleAuth() {
+  await supabaseInit;
   if (!_supaClient) { alert('Authentication not available. Please check your setup.'); return; }
   const { error } = await _supaClient.auth.signInWithOAuth({
     provider: 'google',
